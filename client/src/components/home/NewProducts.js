@@ -15,20 +15,15 @@ const NewProducts = () => {
   const [page, setpage] = useState(1);
 
   useEffect(() => {
-    loadProduct();
+    setloading(true);
+    getProducts('createdAt', 'desc', page)
+      .then((res) => setproducts(res.data))
+      .finally(() => setloading(false));
   }, [page]);
 
   useEffect(() => {
     getProductsCount().then((res) => setproductsCount(res.data));
   }, []);
-
-  const loadProduct = () => {
-    setloading(true);
-    getProducts("createdAt", "desc", page).then((res) => {
-      setproducts(res.data);
-      setloading(false);
-    });
-  };
 
   return (
     <section className="container product-shelf">
