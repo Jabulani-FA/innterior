@@ -57,6 +57,7 @@ const Header = ({ isComingSoon }) => {
             <nav className="primary-navigation" aria-label="Main navigation">
               <Link to="/">Home</Link>
               <Link to="/shop">Shop</Link>
+              <Link to="/design-studio">Room Studio</Link>
               <Link to="/profile">Design services</Link>
             </nav>
             <div className="header-search">

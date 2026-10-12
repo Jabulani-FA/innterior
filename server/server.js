@@ -11,10 +11,14 @@ const cloudinary = require("./routes/cloudinary")
 const coupon = require("./routes/coupon")
 const product = require("./routes/product")
 const sub = require("./routes/Sub")
+const roomDesign = require("./routes/roomDesign")
 
 const allowOrigins = [
     "https://innterior.vercel.app",
-    "https://innteriors.app"
+  "https://innteriors.app",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  ...(process.env.CLIENT_ORIGINS || "").split(",").map((origin) => origin.trim()).filter(Boolean),
 ]
 
 const app = express()
@@ -63,6 +67,7 @@ app.use("/api", sub)
 app.use("/api", cloudinary)
 app.use("/api", coupon)
 app.use("/api", product)
+app.use("/api", roomDesign)
 
 //port
 const port = process.env.PORT || 8000;
