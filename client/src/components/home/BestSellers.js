@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { ArrowRightOutlined } from "@ant-design/icons";
+import { Pagination } from "antd";
+import { Link } from "react-router-dom";
+import { ScrollMenu } from "react-horizontal-scrolling-menu";
+import "react-horizontal-scrolling-menu/dist/styles.css";
 import LoadingCard from "../cards/LoadingCard";
 import ProductCard from "../cards/ProductCard";
 import { getProducts, getProductsCount } from "../../functions/product";
-import { Pagination } from "antd";
-import { ScrollMenu, VisibilityContext } from "react-horizontal-scrolling-menu";
-import "react-horizontal-scrolling-menu/dist/styles.css";
 
 const BestSellers = () => {
   const [products, setproducts] = useState([]);
@@ -29,42 +31,35 @@ const BestSellers = () => {
   };
 
   return (
-    <div className="container">
-      <div className="text-center">
-        <h5 className="poppins-semibold-italic text-md mt-5 mb-0">
-          <em className="text-primary">Best </em>Sellers
-        </h5>
+    <section className="container product-shelf">
+      <div className="shelf-heading">
+        <div>
+          <p className="section-kicker">CUSTOMER FAVOURITES</p>
+          <h2>Most loved</h2>
+        </div>
+        <Link className="shelf-link" to="/shop">
+          View all <ArrowRightOutlined />
+        </Link>
       </div>
-      <br />
-      <img
-        src="/svg/ogive-right-svg.svg"
-        className="svg-class-top-right"
-        alt="innterior addon shapes"
-      />
-      <img
-        src="/svg/ogive-right-svg.svg"
-        className="svg-class-bottom-left"
-        alt="innterior addon shapes"
-      />
       {loading ? (
         <LoadingCard count={5} />
       ) : (
         <ScrollMenu>
           {products.map((product) => (
-            <div key={product._id} className="me-2">
-              <ProductCard product={product} key={product._id} />
+            <div key={product._id} className="shelf-product">
+              <ProductCard product={product} />
             </div>
           ))}
         </ScrollMenu>
       )}
-      <div className="text-center">
+      <div className="shelf-pagination">
         <Pagination
           current={page}
           total={(productsCount / 5) * 10}
           onChange={(value) => setpage(value)}
         />
       </div>
-    </div>
+    </section>
   );
 };
 

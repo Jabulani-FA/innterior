@@ -1,7 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { SearchOutlined } from '@ant-design/icons'
 
 const Search = () => {
@@ -10,32 +9,30 @@ const Search = () => {
     const { search } = useSelector((state) => ({ ...state}))
     const { text } = search
     
-    const handleChange = (e) => {
-        // console.log(e.target.value);
-        dispatch({
-            type: "SEARCH_QUERY",
-            payload: { text: e.target.value },
-        })
+    const handleChange = (event) => {
+        dispatch({ type: 'SEARCH_QUERY', payload: { text: event.target.value } })
     }
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const handleSubmit = (event) => {
+        event.preventDefault()
         navigate(`/shop?${text}`)
     }
-  return (
-    <div className='row mt-2'>
-            <form className='form-inline my-lg-0' style={{display: "flex"}} onSubmit={handleSubmit}>
-                <input
-                    onChange={handleChange}
-                    type='search'
-                    value={text}
-                    className='form-control pb-2 mr-sm-2'
-                    placeholder='Search'
-                />
-                <SearchOutlined onClick={handleSubmit} style={{cursor: "pointer", marginTop: "12px"}} />
-            </form>
-    </div>
-  )
+
+    return (
+        <form className="search-form" onSubmit={handleSubmit} role="search">
+            <input
+                onChange={handleChange}
+                type="search"
+                value={text}
+                className="search-input"
+                placeholder="Search pieces"
+                aria-label="Search products"
+            />
+            <button className="search-submit" type="submit" aria-label="Submit search">
+                <SearchOutlined />
+            </button>
+        </form>
+    )
 }
 
 export default Search

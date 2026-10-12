@@ -1,157 +1,94 @@
 import {
-  AppstoreOutlined,
-  ShoppingOutlined,
-  ShoppingCartOutlined,
-  UserSwitchOutlined,
+  DownOutlined,
   LogoutOutlined,
-  ProfileOutlined,
-  UserAddOutlined,
+  ShoppingCartOutlined,
   UserOutlined,
-  SettingOutlined,
 } from "@ant-design/icons";
-import { Menu, Input } from "antd";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Dropdown } from "antd";
 import { getAuth, signOut } from "firebase/auth";
-import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import Search from "../cards/Search";
 
-const Header = ({isComingSoon}) => {
+const Header = ({ isComingSoon }) => {
   const navigate = useNavigate();
-  const [current, setCurrent] = useState("/");
+  const dispatch = useDispatch();
+  const { user, cart } = useSelector((state) => ({ ...state }));
 
-  let dispatch = useDispatch();
-  let { user, cart } = useSelector((state) => ({ ...state }));
+  const accountItems = user
+    ? [
+        user.role === "admin"
+          ? { key: "/admin/dashboard", label: "Admin dashboard" }
+          : { key: "/user/profile", label: "My profile" },
+        { key: "logout", label: "Log out", icon: <LogoutOutlined /> },
+      ]
+    : [
+        { key: "/login", label: "Log in" },
+        { key: "/register", label: "Create account" },
+      ];
 
-  const items = [
-    {
-      label: "Home",
-      key: "/",
-      icon: <AppstoreOutlined />,
-    },
-    {
-      label: "Shop",
-      key: "/shop",
-      icon: <ShoppingOutlined />,
-    },
-    {
-      label: ` Cart - ${cart.length}`,
-      badge: [
-        {
-          label: `${cart.length}`,
-        },
-      ],
-      key: "/cart",
-      icon: <ShoppingCartOutlined />,
-    },
-
-    user && {
-      label: user.name,
-      key: "user",
-      icon: <UserOutlined />,
-      className: "menuGroup",
-      children: [
-        {
-          type: "group",
-          children: [
-            user.role === "subscriber" && {
-              label: "Profile",
-              key: "/user/history",
-              icon: <ProfileOutlined />,
-            },
-            user.role === "admin" && {
-              label: "Admin Dashboard",
-              key: "/admin/dashboard",
-              icon: <ProfileOutlined />,
-            },
-            {
-              label: "Log Out",
-              key: "logout",
-              icon: <LogoutOutlined />,
-            },
-          ],
-        },
-      ],
-    },
-    !user && {
-      label: "Sign In",
-      key: "signIn",
-      icon: <UserSwitchOutlined />,
-      className: "menuGroup",
-      children: [
-        {
-          type: "group",
-          children: [
-            {
-              label: "Log In",
-              key: "/login",
-              icon: <UserOutlined />,
-            },
-            {
-              label: `Sign up`,
-              key: "/register",
-              icon: <UserAddOutlined />,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      label: "Profile",
-      key: "/user/profile",
-      icon: <SettingOutlined />,
-      className: "float-right",
-    },
-    {
-      label: <Search />,
-      key: "search",
-    },
-  ];
-
-  const logout = (e) => {
-    const auth = getAuth();
-    signOut(auth)
-      .then(() => {
-        dispatch({
-          type: "LOGOUT",
-          payload: null,
-        });
-        setCurrent("/");
-        navigate("/");
-      })
-      .catch((error) => {
-        // An error happened.
-        const errorMessage = error.message;
-        toast.error(errorMessage);
-      });
-  };
-
-  const onClick = (e) => {
-    if (e.key === "logout") {
-      logout();
-    } else if (e.key === "search") {
-      console.log(e.key);
-    } else {
-      setCurrent(e.key);
-      navigate(e.key);
+  const handleAccountAction = ({ key }) => {
+    if (key === "logout") {
+      signOut(getAuth())
+        .then(() => {
+          dispatch({ type: "LOGOUT", payload: null });
+          navigate("/");
+        })
+        .catch((error) => toast.error(error.message));
+      return;
     }
+    navigate(key);
   };
-  //  className="d-flex justify-content-around -mb-0"
+
   return (
-    <>
-      <div className="logo-image">
-        <img src="/Innterior_logo.png" onClick={() => navigate('/')} width={120} alt="innterior - home of all interior decoration"/>
+    <header className="site-header">
+      {!isComingSoon && (
+        <div className="store-announcement">
+          <span>Considered pieces for a home that feels like yours</span>
+        </div>
+      )}
+      <div className="site-header-inner">
+        <Link className="brand-lockup" to="/" aria-label="Innterior home">
+          <img src="/Innterior_logo.png" alt="Innterior" />
+        </Link>
+        {!isComingSoon && (
+          <>
+            <nav className="primary-navigation" aria-label="Main navigation">
+              <Link to="/">Home</Link>
+              <Link to="/shop">Shop</Link>
+              <Link to="/profile">Design services</Link>
+            </nav>
+            <div className="header-search">
+              <Search />
+            </div>
+            <div className="header-actions">
+              <Dropdown
+                menu={{ items: accountItems, onClick: handleAccountAction }}
+                placement="bottomRight"
+                trigger={["click"]}
+              >
+                <button className="header-action" type="button" aria-label="Account menu">
+                  <UserOutlined />
+                  <span>{user ? user.name : "Account"}</span>
+                  <DownOutlined className="account-chevron" />
+                </button>
+              </Dropdown>
+              <Link
+                className="header-action cart-action"
+                to="/cart"
+                aria-label={`Shopping bag with ${cart.length} items`}
+              >
+                <ShoppingCartOutlined />
+                <span>Bag</span>
+                <span className="cart-count">{cart.length}</span>
+              </Link>
+            </div>
+          </>
+        )}
       </div>
-      {!isComingSoon&&<Menu
-        onClick={onClick}
-        selectedKeys={[current]}
-        mode="horizontal"
-        user={user}
-        items={items}
-        className="montserrat-complementary-dd header"
-      />}
-    </>
+    </header>
   );
 };
+
 export default Header;

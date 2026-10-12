@@ -1,8 +1,44 @@
+:root {
+  --color-forest: #214b40;
+  --color-forest-deep: #17372f;
+  --color-clay: #bb6d50;
+  --color-saffron: #d6a64f;
+  --color-ink: #202522;
+  --color-muted: #6d746f;
+  --color-paper: #f7f7f3;
+  --color-white: #ffffff;
+  --color-line: #e3e6df;
+  --font-body: "DM Sans", sans-serif;
+  --font-display: "Playfair Display", Georgia, serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: Roboto, Helvetica, Arial, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-saffron);
+  outline-offset: 3px;
 }
 
 code {

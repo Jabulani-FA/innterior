@@ -78,11 +78,12 @@ const App = () => {
     <>
       <Header isComingSoon={isComingSoon} />
       <ToastContainer />
-      <Routes>
-        {isComingSoon ? (
-          <Route path="*" element={<ComingSoon />} />
-        ) : (
-          <>
+      <main className="app-main">
+        <Routes>
+          {isComingSoon ? (
+            <Route path="*" element={<ComingSoon />} />
+          ) : (
+            <>
             <Route path="/" element={<Home />} />
             <Route path="/profile" element={<Help />} />
             <Route path="/login" element={<Login />} />
@@ -130,9 +131,10 @@ const App = () => {
                 element={<UserProfile />}
               />
             </Route>
-          </>
-        )}
-      </Routes>
+            </>
+          )}
+        </Routes>
+      </main>
     </>
   );
 };

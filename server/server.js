@@ -13,7 +13,8 @@ const product = require("./routes/product")
 const sub = require("./routes/Sub")
 
 const allowOrigins = [
-    "https://innterior.vercel.app"
+    "https://innterior.vercel.app",
+    "https://innteriors.app"
 ]
 
 const app = express()

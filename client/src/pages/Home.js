@@ -1,77 +1,46 @@
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import Jumbotron from "../components/cards/Jumbotron";
-import chair from "../image/chairNone.jpg";
+import React from "react";
+import { Link } from "react-router-dom";
+import { ArrowRightOutlined } from "@ant-design/icons";
 import NewProducts from "../components/home/NewProducts";
 import BestSellers from "../components/home/BestSellers";
 import CategoryList from "../components/cards/category/CategoryList";
 import SubList from "../components/cards/sub/SubList";
-import CategoriesCarousel from "../components/home/CategoriesCarousel"
+import CategoriesCarousel from "../components/home/CategoriesCarousel";
 
 const Home = () => {
-  // let { user } = useSelector((state) => ({...state}))
-  const textList = [
-    "Innterior...",
-    "Innterior with style",
-    "New Products",
-    "Popular Designs",
-    "Popular Products",
-  ];
-  const [loading, setloading] = useState(false);
-
   return (
-    <div>
-      <div className="jumbotron">
-        <div className="container text-center">
-          {loading ? (
-            <h4 className="text-danger">
-              Loading...
-              <img className="imgrotate" alt="" src={chair} />
-            </h4>
-          ) : (
-            <h2 className="playfair-display">
-              <Jumbotron text={textList} />
-            </h2>
-          )}
+    <div className="home-page">
+      <section className="home-hero">
+        <img
+          className="home-hero-photo"
+          src="/pexels-heyho-5998120.jpg"
+          alt="A considered living room with sculptural furniture and soft natural light"
+        />
+        <div className="home-hero-copy">
+          <p className="eyebrow">A HOME, MORE YOU</p>
+          <h1>
+            Make room for <em>better living.</em>
+          </h1>
+          <p className="home-hero-description">
+            Thoughtful furniture and finishing touches for the spaces you call
+            your own.
+          </p>
+          <Link className="store-button store-button-light" to="/shop">
+            Explore the collection <ArrowRightOutlined />
+          </Link>
         </div>
-      </div>
-      {/*  Innterior Image display */}
-      <div className="top-image-display">
-        <div>
-          <img
-            src="https://res.cloudinary.com/dvdy3c2af/image/upload/v1748408793/albero-furniture-bratislava-xRuHNSq5rD0-unsplash_o01xqq.jpg"
-            alt="innterior designs"
-          />
-        </div>
-        <div>
-          <img
-            src="https://res.cloudinary.com/dvdy3c2af/image/upload/v1748408793/jason-briscoe-AQl-J19ocWE-unsplash_huc0md.jpg"
-            alt="innterior designs"
-          />
-        </div>
-        <div>
-          <img
-            src="https://res.cloudinary.com/dvdy3c2af/image/upload/v1748408791/kam-idris-_HqHX3LBN18-unsplash_ppw0to.jpg"
-            alt="innterior designs"
-          />
-        </div>
-        <div>
-          <img
-            src="https://res.cloudinary.com/dvdy3c2af/image/upload/v1748408794/spacejoy-h2_3dL9yLpU-unsplash_npslao.jpg"
-            alt="innterior designs"
-          />
-        </div>
-        <div>
-          <img
-            src="https://res.cloudinary.com/dvdy3c2af/image/upload/v1748408792/pexels-heyho-5998120_pqwa5s.jpg"
-            alt="innterior designs"
-          />
-        </div>
+        <span className="home-hero-caption">Spaces for living, made to last</span>
+      </section>
+
+      <div className="home-service-notes" aria-label="Store benefits">
+        <span>Considered design</span>
+        <span>Pieces for everyday living</span>
+        <span>Delivery across Nigeria</span>
       </div>
 
-      <div>
+      <div className="home-sections">
         <NewProducts />
-        <CategoriesCarousel/>
+        <CategoriesCarousel />
         <BestSellers />
         <div className="container pb-3">
           <CategoryList />
