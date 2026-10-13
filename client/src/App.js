@@ -35,6 +35,7 @@ import CategoryHome from "./pages/category/CategoryHome";
 import SubHome from "./pages/sub/SubHome";
 import Shop from "./pages/Shop";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
 import RoomStudio from "./pages/RoomStudio";
 
 import { auth } from "./pages/auth/Firebase";
@@ -96,6 +97,7 @@ const App = () => {
             <Route path="/sub/:slug" element={<SubHome />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
             <Route path="/design-studio" element={<RoomStudio />} />
 
             {/* admin route*/}

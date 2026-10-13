@@ -1,23 +1,25 @@
-import {React} from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { ClockCircleOutlined, HeartOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
+import { NavLink } from 'react-router-dom';
 
+const links = [
+  { to: '/user/history', label: 'Order history', icon: <ClockCircleOutlined /> },
+  { to: '/user/wishlist', label: 'Wishlist', icon: <HeartOutlined /> },
+  { to: '/user/password', label: 'Password', icon: <LockOutlined /> },
+  { to: '/user/profile', label: 'Profile', icon: <UserOutlined /> },
+];
 
-const UserNav = () => {
-    return (
-        <nav>
-            <ul className='nav flex-column'>
-                <li className='nav-item'>
-                    <Link to='/user/history' className='nav-link'>History</Link>
-                </li>
-                <li className='nav-item'>
-                    <Link to='/user/password' className='nav-link'>Password</Link>
-                </li>
-                <li className='nav-item'>
-                    <Link to='/user/wishlist' className='nav-link'>Wishlist</Link>
-                </li>
-            </ul>
-        </nav>
-      );
-}
+const UserNav = () => (
+  <aside className="account-sidebar">
+    <p className="section-kicker">ACCOUNT</p>
+    <nav aria-label="Account navigation">
+      {links.map((item) => (
+        <NavLink key={item.to} to={item.to}>
+          {item.icon}<span>{item.label}</span>
+        </NavLink>
+      ))}
+    </nav>
+  </aside>
+);
 
-export default UserNav
+export default UserNav;
