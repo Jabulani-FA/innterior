@@ -115,7 +115,7 @@ const ProductUpdate = () => {
           <form onSubmit={handleSubmit}>
             <FileUpload
               values={values}
-              setValues={setvalues}
+              setvalues={setvalues}
               setloading={setloading}
             />
             <div className="form-group">

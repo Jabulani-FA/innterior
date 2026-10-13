@@ -1,98 +1,109 @@
-import React,{useState} from 'react'
-import {Card, Tabs, Tooltip } from 'antd'
-import { Link, useParams } from 'react-router-dom'
-import  { ShoppingCartOutlined, HeartOutlined } from '@ant-design/icons'
-import "react-responsive-carousel/lib/styles/carousel.min.css";
+import React, { useState } from 'react';
+import { CheckOutlined, HeartOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { Carousel } from 'react-responsive-carousel';
-import Chair from '../../image/chairNone.jpg'
-import ProductItemList from './ProductItemList';
-import { Rating } from 'react-simple-star-rating'
-import RatingModal from './modal/RatingModal';
+import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { Rating } from 'react-simple-star-rating';
+import _ from 'lodash';
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import Chair from '../../image/chairNone.jpg';
 import Newrating from '../../functions/rating';
-import _ from 'lodash'
-import { useSelector, useDispatch } from 'react-redux';
+import ProductItemList from './ProductItemList';
+import RatingModal from './modal/RatingModal';
 
-const SingleProduct = ({product, onStarClick}) => {
-    const {_id, title, description, images} = product
-    const { Meta } = Card
-    const { TabPane } = Tabs
-    const { slug } = useParams()
-    const [rating, setrating] = useState(0)
-    const [tooltip, settooltip] = useState("Click to Add")
-    const { user, cart } = useSelector((state) => ({...state}))
-    const dispatch = useDispatch()
+const SingleProduct = ({ product, onStarClick, userRating = 0 }) => {
+  const { _id, title, description, images = [], price, ratings = [] } = product;
+  const { user, cart } = useSelector((state) => ({ ...state }));
+  const dispatch = useDispatch();
+  const [added, setAdded] = useState(false);
 
-    const handleRating = (rate) => {
-        console.log(rate)
-        setrating(rate)
-        console.log(rating)
+  const handleAddToCart = () => {
+    const existingIndex = cart.findIndex((item) => item._id === _id);
+    let updatedCart;
+    if (existingIndex >= 0) {
+      updatedCart = cart.map((item, index) => (
+        index === existingIndex ? { ...item, count: (item.count || 1) + 1 } : item
+      ));
+    } else {
+      updatedCart = _.uniqWith([...cart, { ...product, count: 1 }], _.isEqual);
     }
-    const handleAddToCart = () => {
-        let cart = []
-        if(typeof window !== "undefined") {
-            //if cart is in local storage
-            if(localStorage.getItem('cart')){
-                cart = JSON.parse(localStorage.getItem('cart'))
-            }
-            cart.push({
-                ...product,
-                count: 1,
-            })
-        }
-        let unique = _.uniqWith(cart, _.isEqual)
 
-        localStorage.setItem("cart", JSON.stringify(unique))
-        settooltip("Added")
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+    dispatch({ type: 'ADD_TO_CART', payload: updatedCart });
+    setAdded(true);
+    window.setTimeout(() => setAdded(false), 1500);
+  };
 
-        dispatch({
-            type: "ADD_TO_CART",
-            payload: unique,
-        })
-    }
   return (
-    <>
-       <div className='col-md-7'>
-            {images && images.length ? <Carousel autoPlay infiniteLoop>
-                {images && images.map((image) => <img key={image.public_id} src={image.url}/>)}
-            </Carousel>:
-            <Card className='defaultCarous'>
-                <img src={Chair} />
-            </Card>}
-            <Tabs type='card'>
-                <TabPane tab='Description' key='1'>
-                    {description&& description}
-                </TabPane>
-                <TabPane tab='Contact' key='2'>
-                    Contact vendor to confirm product Availability
-                </TabPane>
-            </Tabs>   
-        </div> 
-        <div className='col-md-5'>
-            <h3 className='bg-info p-3 text-center'>{title}</h3>
-            {product && product.ratings && product.ratings.length > 0 ? Newrating(product) :<div className='text-center pt-1 pb-3'>No ratings yet</div>}
-            <Card
-                actions={[
-                    <Tooltip>
-                        <p onClick={handleAddToCart}><ShoppingCartOutlined className='text-primary'/><br/> Add to Cart</p>
-                    </Tooltip>,
-                    <Link to={`/product-details/${slug}`}>
-                        <HeartOutlined className='text-info'/><br/>Add To Wishlist
-                    </Link>,
-                    <RatingModal>
-                        <Rating
-                            name={_id}
-                            onClick={(rate) => onStarClick(rate)}
-                        /> 
-                    </RatingModal>
-                 
-                ]}
-            >
-                <ProductItemList product={product}/>
-            </Card>
-        </div>
-    </>
-    
-  )
-}
+    <section className="product-detail-grid">
+      <div className="product-detail-gallery">
+        {images.length ? (
+          <Carousel
+            showStatus={false}
+            showThumbs={images.length > 1}
+            infiniteLoop={images.length > 1}
+            showIndicators={images.length > 1}
+            swipeable
+            emulateTouch
+          >
+            {images.map((image, index) => (
+              <div className="detail-gallery-slide" key={image.public_id || image.url || index}>
+                <img src={image.url} alt={`${title} view ${index + 1}`} />
+              </div>
+            ))}
+          </Carousel>
+        ) : (
+          <div className="detail-gallery-fallback">
+            <img src={Chair} alt={`${title} product preview`} />
+          </div>
+        )}
+        <div className="detail-gallery-caption">A considered piece for everyday living</div>
+      </div>
 
-export default SingleProduct
+      <div className="product-detail-information">
+        {product.category?.name && (
+          <Link className="detail-category" to={`/category/${product.category.slug}`}>
+            {product.category.name}
+          </Link>
+        )}
+        <h1>{title}</h1>
+        <div className="detail-rating-line">
+          {ratings.length ? Newrating(product) : <span>No reviews yet</span>}
+          <span>{ratings.length ? `${ratings.length} ${ratings.length === 1 ? 'review' : 'reviews'}` : 'Be the first to review'}</span>
+        </div>
+        <p className="detail-price">₦{Number(price || 0).toLocaleString()}</p>
+        <p className="detail-description">{description || 'A considered piece for your home.'}</p>
+
+        <div className="detail-specifications">
+          <h2>Piece details</h2>
+          <ProductItemList product={product} />
+        </div>
+
+        <div className="detail-purchase-actions">
+          <button className={`store-button store-button-dark${added ? ' is-added' : ''}`} type="button" onClick={handleAddToCart}>
+            {added ? <CheckOutlined /> : <ShoppingCartOutlined />}
+            {added ? 'Added to bag' : 'Add to bag'}
+          </button>
+          <Link className="detail-save-link" to={user ? '/user/wishlist' : '/login'} aria-label="Save this piece">
+            <HeartOutlined />
+          </Link>
+        </div>
+        <div className="detail-rating-action">
+          <span>{userRating ? 'Your rating' : 'Rate this piece'}</span>
+          <RatingModal>
+            <Rating
+              name={_id}
+              initialValue={userRating}
+              onClick={onStarClick}
+              allowFraction
+              size={22}
+            />
+          </RatingModal>
+        </div>
+        <p className="detail-service-note">Need help with your order? Contact our team before purchase to confirm availability and delivery.</p>
+      </div>
+    </section>
+  );
+};
+
+export default SingleProduct;

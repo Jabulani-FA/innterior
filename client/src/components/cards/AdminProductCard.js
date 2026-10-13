@@ -1,32 +1,36 @@
-import { React }from 'react'
-import {EditOutlined, DeleteOutlined} from '@ant-design/icons'
+import React from 'react';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
-import { Card } from 'antd'
 
-
-const { Meta } = Card;
-const AdminProductCard = ({product, handleRemove}) => {
-    const { title, description, images, slug } = product
+const AdminProductCard = ({ product, handleRemove }) => {
+  const { title, description, images, slug, price, quantity } = product;
 
   return (
-    <Card
-    hoverable
-    style={{
-      width: 240,
-      marginBottom: 10,
-    }}
-    className='p-1'
-    cover={<img alt={product.title || "product image"} style={{width: 232,height: 150, objectFit: "cover"}}src={images && images.length ? images[0].url:"https://res.cloudinary.com/dvdy3c2af/image/upload/v1689964304/cld-sample-2.jpg"} />}
-    actions={[
-        <Link to={`/admin/product/${slug}`}>
-            <EditOutlined className='text-primary'/>
-        </Link>,
-        <DeleteOutlined className='text-danger' onClick={() => handleRemove(slug)}/>,
-    ]}
-  >
-    <Meta title={title} description={`${description && description.substring(0,50)}...`} />
-  </Card>
-  )
-}
+    <article className="admin-product-card">
+      <Link className="admin-product-image" to={`/product-details/${slug}`}>
+        <img
+          src={images && images.length ? images[0].url : '/Innterior.png'}
+          alt={title || 'Product'}
+        />
+      </Link>
+      <div className="admin-product-content">
+        <h3 title={title}>{title}</h3>
+        <p>{description || 'No product description added.'}</p>
+        <strong>₦{Number(price || 0).toLocaleString()}</strong>
+        <span className="admin-stock-note">{quantity ?? 0} in stock</span>
+      </div>
+      <div className="admin-product-actions">
+        <Link to={`/admin/product/${slug}`} aria-label={`Edit ${title}`} title="Edit product">
+          <EditOutlined />
+        </Link>
+        {handleRemove && (
+          <button type="button" onClick={() => handleRemove(slug)} aria-label={`Delete ${title}`} title="Delete product">
+            <DeleteOutlined />
+          </button>
+        )}
+      </div>
+    </article>
+  );
+};
 
-export default AdminProductCard
+export default AdminProductCard;

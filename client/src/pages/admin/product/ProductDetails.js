@@ -1,76 +1,105 @@
-import React, { useEffect, useState } from 'react'
-import { getProduct, getRelated }from '../../../functions/product'
-import { useParams } from 'react-router-dom'
-import { productStar } from '../../../functions/product'
-import SingleProduct from '../../../components/cards/SingleProduct'
-import { useSelector } from 'react-redux'
-import ProductCard from '../../../components/cards/ProductCard'
+import React, { useEffect, useState } from 'react';
+import { ArrowLeftOutlined } from '@ant-design/icons';
+import { toast } from 'react-toastify';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import ProductCard from '../../../components/cards/ProductCard';
+import SingleProduct from '../../../components/cards/SingleProduct';
+import { getProduct, getRelated, productStar } from '../../../functions/product';
 
 const ProductDetails = () => {
-    const [loading, setloading] = useState(false)
-    const [product, setproduct] = useState([])
-    const [related, setrelated] = useState()
-    const [star, setstar] = useState()
-    const { slug } = useParams()
-    const { user } = useSelector((state) => ({ ...state }))
+  const [product, setproduct] = useState(null);
+  const [related, setrelated] = useState([]);
+  const [loading, setloading] = useState(true);
+  const [star, setstar] = useState(0);
+  const { slug } = useParams();
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => ({ ...state }));
 
-    useEffect(() => {
-      loadProduct()
-    }, [])
-
-    useEffect(() => {
-      // this block of code retains the user rating on refresh by the means of backend
-      if(product.ratings && user){
-        let existingRatingObject = product.ratings.find((ele) => ele.postedBy.toString() === user._id.toString())
-        existingRatingObject && setstar(existingRatingObject.star)//current user rating
-      }
-    }, [])
-    
-
-    const onStarClick = (rate) => {
-      const productId = product._id
-      const token = user.token
-      setstar(rate)
-      productStar({productId, rate, token})
-      .then((res) => {
-        console.log(res.data);
-        loadProduct()
+  useEffect(() => {
+    let active = true;
+    setloading(true);
+    setproduct(null);
+    setrelated([]);
+    getProduct(slug)
+      .then(async (response) => {
+        if (!active) return;
+        const loadedProduct = response.data;
+        setproduct(loadedProduct);
+        if (loadedProduct?._id) {
+          const relatedResponse = await getRelated(loadedProduct._id);
+          if (active) setrelated(relatedResponse.data || []);
+        }
       })
-    }
-    const loadProduct = () => {
-      // setloading(true)
-      getProduct(slug)
-      .then((res) => {
-          setproduct(res.data)
-          // setloading(false)
-          // console.log(res.data._id);
-          //load related
-          getRelated(res.data._id).then(res => setrelated(res.data))
+      .catch(() => {
+        if (active) toast.error('This product could not be loaded.');
       })
+      .finally(() => active && setloading(false));
+
+    return () => { active = false; };
+  }, [slug]);
+
+  useEffect(() => {
+    if (!product?.ratings || !user?._id) {
+      setstar(0);
+      return;
     }
+    const existingRating = product.ratings.find(
+      (rating) => rating.postedBy?.toString() === user._id.toString()
+    );
+    setstar(existingRating?.star || 0);
+  }, [product, user]);
+
+  const onStarClick = async (rate) => {
+    if (!user?.token) {
+      toast.info('Sign in to rate this piece.');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      await productStar(product._id, rate, user.token);
+      setstar(rate);
+      const refreshed = await getProduct(slug);
+      setproduct(refreshed.data);
+      toast.success('Your rating has been saved.');
+    } catch {
+      toast.error('Your rating could not be saved.');
+    }
+  };
 
   return (
-    <div className='container-fluid'>
-      {/* <Breadcrumb separator='>' items={items}/> */}
-      <div className='row pt-4'>
-        <SingleProduct product={product} onStarClick={onStarClick}/>
-      </div>
-      <div className='row'>
-        <div className='col text-center pt-5 pb-5'>
-          <hr/>
-            Related Products
-          <hr/>
-        </div>
-      </div>
-      <div className='container'>
-        <div className='row pb-5'>
-          {related && related.length ? related.map((r) => (
-              <div key={r._id} className='col-md-3'><ProductCard product={r}/></div>
-          )):<div className='text-center'>No related products found</div>}
-        </div>
-      </div>
+    <div className="product-detail-page">
+      <Link className="detail-back-link" to="/shop">
+        <ArrowLeftOutlined /> Back to collection
+      </Link>
+      {loading ? (
+        <div className="detail-loading" role="status">Loading product details...</div>
+      ) : product ? (
+        <>
+          <SingleProduct product={product} onStarClick={onStarClick} userRating={star} />
+          <section className="related-products-section">
+            <div className="related-heading">
+              <div>
+                <p className="section-kicker">COMPLETE THE ROOM</p>
+                <h2>You may also like</h2>
+              </div>
+              <Link to="/shop">Shop all pieces <ArrowLeftOutlined /></Link>
+            </div>
+            {related.length ? (
+              <div className="related-product-grid">
+                {related.map((item) => <ProductCard key={item._id} product={item} />)}
+              </div>
+            ) : (
+              <p className="related-empty">No related pieces to show just yet.</p>
+            )}
+          </section>
+        </>
+      ) : (
+        <div className="detail-loading">This product is no longer available.</div>
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default ProductDetails
+export default ProductDetails;
