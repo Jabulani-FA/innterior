@@ -18,7 +18,7 @@ const Home = () => {
         />
         <div className="home-hero-copy">
           <p className="eyebrow">A HOME, MORE YOU</p>
-          <h1>
+          <h1 className="text-white">
             Make room for <em>better living.</em>
           </h1>
           <p className="home-hero-description">
