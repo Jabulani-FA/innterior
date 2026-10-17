@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { apiBase } from './api';
 
 export const createOrUpdateUser = async (authtoken) => {
-  return await axios.post(`https://innteriors-backend.onrender.com/api/create-or-update-user`, 
+  return await axios.post(`${apiBase}/create-or-update-user`,
   {},
   {
     headers: {
@@ -11,7 +12,7 @@ export const createOrUpdateUser = async (authtoken) => {
 }
 
 export const currentUser = async (authtoken) => {
-  return await axios.post(`https://innteriors-backend.onrender.com/api/current-user`, 
+  return await axios.post(`${apiBase}/current-user`,
   {},
   {
     headers: {
@@ -20,7 +21,7 @@ export const currentUser = async (authtoken) => {
   })
 }
 export const currentAdmin = async (authtoken) => {
-  return await axios.post(`https://innteriors-backend.onrender.com/api/current-admin`, 
+  return await axios.post(`${apiBase}/current-admin`,
   {},
   {
     headers: {

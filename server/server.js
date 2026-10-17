@@ -15,6 +15,8 @@ const roomDesign = require("./routes/roomDesign")
 const application = require("./routes/application")
 
 const allowOrigins = [
+  "https://interior-compact.vercel.app",
+  "https://innterior-compact.vercel.app",
     "https://innterior.vercel.app",
   "https://innteriors.app",
   "http://localhost:3000",
