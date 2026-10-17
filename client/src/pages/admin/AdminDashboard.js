@@ -45,7 +45,7 @@ const AdminDashboard = () => {
             placeholder="Search to filter Products"
           />
           <div className="row">
-            {products.filter(filtered(searchFilter)).map((product) => (
+            {loading ? <p>Loading products...</p> : products.filter(filtered(searchFilter)).map((product) => (
               <div key={product._id} className="col-md-4 col-sm-6">
                 <AdminProductCard product={product} />
               </div>

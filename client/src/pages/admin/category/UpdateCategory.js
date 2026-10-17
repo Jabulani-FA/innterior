@@ -15,16 +15,13 @@ const UpdateCategory = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadCategory();
-  }, []);
-
-  const loadCategory = () => {
     setloading(true);
     getCategory(slug).then((c) => {
       setName(c.data.category.name);
+    }).finally(() => {
+      setloading(false);
     });
-    setloading(false);
-  };
+  }, [slug]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

@@ -37,37 +37,23 @@ const ProductUpdate = () => {
     price,
     categories,
     category,
-    subs,
     shipping,
     quantity,
-    images,
     colors,
     color,
     brand,
   } = values;
 
-  const loadCategories = () => {
-    getCategories().then((c) => setvalues({ ...values, categories: c.data }));
-  };
   useEffect(() => {
-    loadProduct();
-    loadCategories();
-  }, []);
-
-  const loadProduct = () => {
     getProduct(slug).then((p) => {
-      setvalues({ ...values, ...p.data });
-      // console.log("data",p);
+      setvalues((current) => ({ ...current, ...p.data }));
       getCategorySubs(p.data.category._id).then((res) => {
         setsubOptions(res.data);
       });
-      let arr = [];
-      p.data.subs.map((s) => {
-        arr.push(s._id);
-      });
-      setArrayOfSubsId((prev) => arr);
+      setArrayOfSubsId(p.data.subs.map((sub) => sub._id));
     });
-  };
+    getCategories().then((c) => setvalues((current) => ({ ...current, categories: c.data })));
+  }, [slug]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -116,6 +102,7 @@ const ProductUpdate = () => {
               setvalues={setvalues}
               setloading={setloading}
             />
+            {loading && <p role="status">Uploading images...</p>}
             <div className="form-group">
               <label>Title</label>
               <input

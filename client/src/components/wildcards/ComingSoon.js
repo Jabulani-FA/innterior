@@ -1,12 +1,13 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+
+const timeCapsule = {
+  days: "00",
+  hours: "00",
+  minutes: "00",
+  seconds: "00",
+};
 
 const ComingSoon = () => {
-  const timeCapsule = {
-    days: "00",
-    hours: "00",
-    minutes: "00",
-    seconds: "00",
-  };
   const [timeRemainder, settimeRemainder] = useState(timeCapsule);
   const { days, hours, minutes, seconds } = timeRemainder;
   useEffect(() => {
@@ -33,8 +34,8 @@ const ComingSoon = () => {
         minutes: String(minutes).padStart(2, 0),
         seconds: String(seconds).padStart(2, 0),
       });
-      return () => clearInterval(interval);
     }, 1000);
+    return () => clearInterval(interval);
   }, []);
 
   return (

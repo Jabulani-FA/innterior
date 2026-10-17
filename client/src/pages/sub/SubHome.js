@@ -16,7 +16,7 @@ const SubHome = () => {
             setproducts(res.data.products)
             setloading(false)
         })
-    }, [])
+    }, [slug])
     
   return (
     <div className='container'>

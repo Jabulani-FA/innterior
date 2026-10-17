@@ -19,7 +19,7 @@ const RegisterComplete = () => {
       if (user && user.token) {
         navigate('/')
       }
-    }, [user]);
+    }, [navigate, user]);
     const items = [
       {
         title: 'Register',

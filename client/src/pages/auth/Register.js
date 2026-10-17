@@ -15,7 +15,7 @@ const Register = () => {
     if (user && user.token) {
         navigate('/')
     }
-  },[user]);
+  }, [navigate, user]);
   
   const handleSubmit = (e) => {
     e.preventDefault()

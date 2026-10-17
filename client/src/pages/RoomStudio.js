@@ -170,11 +170,11 @@ const RoomStudio = () => {
           <div className="before-after-grid">
             <figure className="room-image-panel">
               <figcaption><span>01</span> YOUR ROOM</figcaption>
-              <img src={photoPreview} alt="Your original room photo" />
+              <img src={photoPreview} alt="Your room before redesign" />
             </figure>
             <figure className="room-image-panel room-image-result">
               <figcaption><span>02</span> THE NEW DIRECTION</figcaption>
-              <img src={result.image} alt="AI-generated reimagining of your room" />
+              <img src={result.image} alt="A reimagined version of your room" />
             </figure>
           </div>
 

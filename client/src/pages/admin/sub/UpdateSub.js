@@ -18,16 +18,12 @@ const UpdateSub = () => {
   const [category, setcategory] = useState("");
 
   useEffect(() => {
-    loadSubs();
-  }, []);
-
-  const loadSubs = () => {
     getSub(slug).then((c) => {
       setcategory(c.data.sub.parent);
       setName(c.data.sub.name);
     });
     getCategories().then((c) => setcategories(c.data));
-  };
+  }, [slug]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

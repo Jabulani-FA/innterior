@@ -51,7 +51,7 @@ const FileUpload = ({values, setvalues, setloading}) => {
                 );
             }
         }
-    },[values])
+    }, [setloading, setvalues, user, values])
 
     const handleImageRemove = useCallback(( public_id ) => {
         setloading(true)
@@ -74,7 +74,7 @@ const FileUpload = ({values, setvalues, setloading}) => {
             console.log(err);
             setloading(false)
         })
-    },[values])
+    }, [setloading, setvalues, user, values])
   return (
     <>
         <div className='row'>

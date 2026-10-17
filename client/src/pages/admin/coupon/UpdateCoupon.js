@@ -25,20 +25,15 @@ const UpdateCoupon = () => {
   const [enforcedDate, setenforcedDate] = useState("");
 
   useEffect(() => {
-    loadCoupons();
-  }, []);
-
-  const loadCoupons = () => {
     getCoupon(slug).then((c) => {
       console.log(c.data);
       setcoupon(c.data);
     });
-  };
+  }, [slug]);
+
   useEffect(() => {
-    const enforcedDate =
-      expiry !== "" && new Date(expiry).toISOString().split("T")[0];
-    setenforcedDate(enforcedDate);
-  }, [coupon]);
+    setenforcedDate(expiry ? new Date(expiry).toISOString().split("T")[0] : "");
+  }, [expiry]);
 
   const handleChange = (e) => {
     setcoupon({

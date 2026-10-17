@@ -16,7 +16,7 @@ const ForgotPassword = () => {
         if (user && user.token) {
             navigate('/')
         }
-    },[user]);
+    }, [navigate, user]);
     const resetPassword = (e) => {
         e.preventDefault();
         setloading(true)

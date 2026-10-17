@@ -16,7 +16,7 @@ const CategoryHome = () => {
             setproducts(res.data.products)
             setloading(false)
         })
-    }, [])
+    }, [slug])
     
   return (
     <div className='container'>

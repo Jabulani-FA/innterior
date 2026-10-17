@@ -12,14 +12,6 @@ const ProductCreate = () => {
   const { user } = useSelector((state) => ({ ...state }));
   const { Option } = Select;
 
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
-  const loadCategories = () => {
-    getCategories().then((c) => setvalues({ ...values, categories: c.data }));
-  };
-
   const initialState = {
     title: "",
     description: "",
@@ -52,18 +44,18 @@ const ProductCreate = () => {
   const [showSub, setshowSub] = useState(false);
   const [loading, setloading] = useState(false);
   const [values, setvalues] = useState(initialState);
+  useEffect(() => {
+    getCategories().then((c) => setvalues((current) => ({ ...current, categories: c.data })));
+  }, []);
+
   const {
     title,
     description,
     price,
     categories,
-    category,
     subs,
-    shipping,
     quantity,
-    images,
     colors,
-    color,
     brand,
   } = values;
 
@@ -94,6 +86,7 @@ const ProductCreate = () => {
               setvalues={setvalues}
               setloading={setloading}
             />
+            {loading && <p role="status">Uploading images...</p>}
             <div className="form-group">
               <label>Title</label>
               <input

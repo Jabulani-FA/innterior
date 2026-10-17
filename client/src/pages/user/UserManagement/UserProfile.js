@@ -15,14 +15,14 @@ const UserProfile = () => {
   const { fullName, email, address, nickName, mobileNo } = uservalues;
   useEffect(() => {
     if (user !== null) {
-      setuservalues({
-        ...uservalues,
+      setuservalues((current) => ({
+        ...current,
         fullName: user.name,
         email: user.email,
         address: user.address,
         nickName: user.NickName,
         mobileNo: user.mobileNo,
-      });
+      }));
     }
   }, [user]);
   const handleChange = (e) => {

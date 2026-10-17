@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { PaystackButton } from "react-paystack";
 import HelpNav from "../../../components/nav/HelpNav";
-import { Link } from "react-router-dom";
 import StripePayment from "./paymentsMethods/StripePayment";
 
 const PaymentManagement = () => {

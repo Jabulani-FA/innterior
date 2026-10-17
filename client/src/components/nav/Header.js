@@ -63,7 +63,6 @@ const Header = ({ isComingSoon }) => {
               <Link to="/shop">Shop</Link>
               <Link to="/makers">Makers</Link>
               <Link to="/design-studio">Room Studio</Link>
-              <Link to="/profile">Design services</Link>
             </nav>
             <div className="header-search">
               <Search />
