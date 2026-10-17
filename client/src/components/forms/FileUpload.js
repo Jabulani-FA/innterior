@@ -4,6 +4,12 @@ import Resizer from 'react-image-file-resizer'
 import {Avatar, Badge} from 'antd'
 import axios from 'axios'
 
+const apiBase = process.env.REACT_APP_API_BASE || (
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:8000/api'
+        : 'https://innteriors-backend.onrender.com/api'
+)
+
 const FileUpload = ({values, setvalues, setloading}) => {
     const { user } = useSelector((state) => ({...state }))
     
@@ -27,7 +33,7 @@ const FileUpload = ({values, setvalues, setloading}) => {
                     (uri) => {
                         //   resolve(uri);
                         console.log(uri);
-                        axios.post('http://localhost:8000/api/upload-image', 
+                        axios.post(`${apiBase}/upload-image`, 
                             { image: uri },
                             {
                                 headers:{
@@ -54,7 +60,7 @@ const FileUpload = ({values, setvalues, setloading}) => {
 
     const handleImageRemove = useCallback(( public_id ) => {
         setloading(true)
-        axios.post('http://localhost:8000/api/remove-image', 
+        axios.post(`${apiBase}/remove-image`, 
         { public_id },
         {
             headers:{

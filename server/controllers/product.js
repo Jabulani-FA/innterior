@@ -1,12 +1,13 @@
 const Product = require('../models/product');
 const User = require("../models/user")
+const mongoose = require('mongoose');
 const slugify = require('slugify');
 
 exports.create = async (req, res) => {
     try {
-        console.log(req.body);
-        req.body.slug = slugify(req.body.title)
-        const newProduct = await new Product(req.body).save()
+        const productData = { ...req.body, slug: slugify(req.body.title) };
+        if (req.vendor && req.vendorWrite !== false) productData.vendorId = req.vendor._id;
+        const newProduct = await new Product(productData).save()
         res.json(newProduct)
     }catch(err){
         console.log(err);
@@ -28,9 +29,10 @@ exports.listAll = async(req,res) => {
 
 exports.remove = async(req,res) => {
     try{
-        const deleted = await Product.findOneAndRemove({
-            slug: req.params.slug
-        }).exec()
+        const query = { slug: req.params.slug };
+        if (req.vendorWrite) query.vendorId = req.vendor._id;
+        const deleted = await Product.findOneAndRemove(query).exec()
+        if (!deleted) return res.status(404).json({ message: 'Product not found or not owned by this vendor.' });
         res.json(deleted)
     }catch(err) {
         console.log(err);
@@ -40,11 +42,19 @@ exports.remove = async(req,res) => {
 
 exports.update = async(req,res) => {
     try{
+        const query = { slug: req.params.slug };
+        if (req.vendorWrite) query.vendorId = req.vendor._id;
+        const updateData = { ...req.body };
+        if (req.vendorWrite) {
+            delete updateData.vendorId;
+            delete updateData._id;
+        }
         const updated = await Product.findOneAndUpdate(
-            {slug: req.params.slug},
-            req.body,
+            query,
+            updateData,
             {new: true}
         ).exec()
+        if (!updated) return res.status(404).json({ message: 'Product not found or not owned by this vendor.' });
         res.json(updated)
     }catch(err) {
         console.log(err);
@@ -256,4 +266,25 @@ exports.searchFilters = async (req, res) => {
         // console.log("brand -->", brand);
         await handleBrand(req, res, brand)
     }
+}
+
+exports.listVendorProducts = async (req, res) => {
+    const products = await Product.find({ vendorId: req.vendor._id })
+        .populate('category')
+        .populate('subs')
+        .sort({ createdAt: -1 })
+        .exec();
+    return res.json(products);
+}
+
+exports.listPublicVendorProducts = async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.vendorId)) return res.status(400).json({ message: 'Invalid vendor id.' });
+    const vendor = await User.findOne({ _id: req.params.vendorId, role: 'vendor', 'vendorProfile.status': 'active' }).select('_id').exec();
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found.' });
+    const products = await Product.find({ vendorId: req.params.vendorId })
+        .populate('category')
+        .populate('subs')
+        .sort({ createdAt: -1 })
+        .exec();
+    return res.json(products);
 }

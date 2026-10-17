@@ -20,7 +20,11 @@ const Header = ({ isComingSoon }) => {
     ? [
         user.role === "admin"
           ? { key: "/admin/dashboard", label: "Admin dashboard" }
-          : { key: "/user/profile", label: "My profile" },
+          : user.role === "vendor"
+            ? { key: "/vendor/dashboard", label: "Vendor studio" }
+            : user.role === "talent"
+              ? { key: "/talent/dashboard", label: "Talent studio" }
+              : { key: "/user/profile", label: "My profile" },
         { key: "logout", label: "Log out", icon: <LogoutOutlined /> },
       ]
     : [
@@ -57,6 +61,7 @@ const Header = ({ isComingSoon }) => {
             <nav className="primary-navigation" aria-label="Main navigation">
               <Link to="/">Home</Link>
               <Link to="/shop">Shop</Link>
+              <Link to="/makers">Makers</Link>
               <Link to="/design-studio">Room Studio</Link>
               <Link to="/profile">Design services</Link>
             </nav>

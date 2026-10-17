@@ -18,6 +18,7 @@ import Password from "./pages/user/Password";
 import Wishlist from "./pages/user/Wishlist";
 
 import AdminRoute from "./components/routes/AdminRoute";
+import MarketplaceRoute from "./components/routes/MarketplaceRoute";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import CategoryCreate from "./pages/admin/category/CategoryCreate";
 import ProductCreate from "./pages/admin/product/ProductCreate";
@@ -26,6 +27,7 @@ import AllProducts from "./pages/admin/product/AllProducts";
 import ProductDetails from "./pages/admin/product/ProductDetails";
 import UpdateCategory from "./pages/admin/category/UpdateCategory";
 import RoleApplicationPage from "./pages/admin/RoleManagement/RoleApplication";
+import AdminApplications from "./pages/admin/RoleManagement/AdminApplications";
 import CouponCreate from "./pages/admin/coupon/CreateCoupon";
 import UpdateCoupon from "./pages/admin/coupon/UpdateCoupon";
 import CreateSub from "./pages/admin/sub/CreateSub";
@@ -46,6 +48,8 @@ import ComingSoon from "./components/wildcards/ComingSoon";
 import TermsAndConditions from "./pages/user/UserManagement/TermsAndConditions";
 import PaymentManagement from "./pages/user/UserManagement/PaymentManagement";
 import UserProfile from "./pages/user/UserManagement/UserProfile";
+import MarketplaceDashboard from "./pages/MarketplaceDashboard";
+import MarketplaceDirectory from "./pages/MarketplaceDirectory";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -99,6 +103,7 @@ const App = () => {
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/design-studio" element={<RoomStudio />} />
+            <Route path="/makers" element={<MarketplaceDirectory />} />
 
             {/* admin route*/}
             <Route element={<AdminRoute />}>
@@ -115,6 +120,17 @@ const App = () => {
               <Route path="/admin/product" element={<ProductCreate />} />
               <Route path="/admin/product/:slug" element={<ProductUpdate />} />
               <Route path="/admin/products" element={<AllProducts />} />
+              <Route path="/admin/applications" element={<AdminApplications />} />
+            </Route>
+
+            <Route element={<MarketplaceRoute role="vendor" />}>
+              <Route path="/vendor/dashboard" element={<MarketplaceDashboard role="vendor" />} />
+              <Route path="/vendor/products/new" element={<ProductCreate />} />
+              <Route path="/vendor/products/:slug" element={<ProductUpdate />} />
+            </Route>
+
+            <Route element={<MarketplaceRoute role="talent" />}>
+              <Route path="/talent/dashboard" element={<MarketplaceDashboard role="talent" />} />
             </Route>
 
             <Route element={<UserRoute />}>

@@ -78,7 +78,7 @@ const ProductUpdate = () => {
       .then((res) => {
         console.log(res);
         toast.success(`${res.data.title} has been updated`);
-        navigate("/admin/products");
+        navigate(user?.role === "vendor" ? "/vendor/dashboard" : "/admin/products");
       })
       .catch((err) => {
         console.log(err);
@@ -106,9 +106,7 @@ const ProductUpdate = () => {
   return (
     <div className="container-fluid">
       <div className="row">
-        <div className="col-md-3 col-sm-4">
-          <AdminNav />
-        </div>
+        {user?.role === "admin" && <div className="col-md-3 col-sm-4"><AdminNav /></div>}
         <div className="col-md-10">
           <h4>Product Update</h4>
           <hr />

@@ -6,12 +6,14 @@ import {
   PlusOutlined,
   ShoppingOutlined,
   TagOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 import { Link, NavLink } from "react-router-dom";
 
 const navigation = [
   { to: "/admin/dashboard", label: "Overview", icon: <AppstoreOutlined />, end: true },
   { to: "/admin/products", label: "Products", icon: <ShoppingOutlined /> },
+  { to: "/admin/applications", label: "Vendor & talent review", icon: <TeamOutlined /> },
   { to: "/admin/product", label: "Add product", icon: <PlusOutlined /> },
   { to: "/admin/category", label: "Categories", icon: <TagOutlined /> },
   { to: "/admin/sub", label: "Sub-categories", icon: <AppstoreOutlined /> },

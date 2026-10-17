@@ -84,9 +84,7 @@ const ProductCreate = () => {
   return (
     <div className="container-fluid">
       <div className="row">
-        <div className="col-md-3 col-sm-4">
-          <AdminNav />
-        </div>
+        {user?.role === "admin" && <div className="col-md-3 col-sm-4"><AdminNav /></div>}
         <div className="col-md-10 mt-4">
           <h4>Product Create</h4>
           <hr />

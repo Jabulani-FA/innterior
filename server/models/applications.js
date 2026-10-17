@@ -9,7 +9,6 @@ const application = new mongoose.Schema(
     },
     email: {
       type: String,
-      unique: true,
       text: true,
       index: true,
       required: true,
@@ -17,12 +16,11 @@ const application = new mongoose.Schema(
     user: { type: ObjectId, ref: "User", required: true },
     phone: {
       type: String,
-      unique: true,
-      sparse: true,
       required: true,
     },
     role: {
       type: String,
+      enum: ["vendor", "talent"],
       required: true,
     },
     businessName: {
@@ -36,6 +34,23 @@ const application = new mongoose.Schema(
     description: {
       type: String,
     },
+    specialties: [{ type: String, trim: true }],
+    productTypes: [{ type: String, trim: true }],
+    serviceArea: { type: String, trim: true },
+    identityReference: { type: String, trim: true },
+    businessRegistrationReference: { type: String, trim: true },
+    payoutAccountName: { type: String, trim: true },
+    payoutProvider: { type: String, trim: true },
+    verification: {
+      identity: { type: Boolean, default: false },
+      business: { type: Boolean, default: false },
+      portfolio: { type: Boolean, default: false },
+      payout: { type: Boolean, default: false },
+      terms: { type: Boolean, default: false },
+    },
+    reviewNotes: { type: String, maxlength: 2000, default: "" },
+    reviewedBy: { type: ObjectId, ref: "User" },
+    reviewedAt: Date,
     status:{
       type: String,
       enum: ["pending", "approved", "declined", "suspended"],
@@ -44,5 +59,11 @@ const application = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+application.pre('validate', function normalizeLegacyRole(next) {
+  if (this.role === 'furniture-seller') this.role = 'vendor';
+  if (this.role === 'interior-decorator') this.role = 'talent';
+  next();
+});
 
 module.exports = mongoose.model("RoleApplication", application);

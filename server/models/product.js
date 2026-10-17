@@ -60,6 +60,11 @@ const productSchema = new mongoose.Schema(
             trim: true,
             maxlength: 32,
         },
+        vendorId: {
+            type: ObjectId,
+            ref: 'User',
+            index: true,
+        },
         ratings: [
             {
                 star: Number,

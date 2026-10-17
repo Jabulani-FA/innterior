@@ -1,4 +1,5 @@
 const cloudinary = require('cloudinary')
+const Product = require('../models/product')
 
 cloudinary.config({ 
     cloud_name: 'dvdy3c2af', 
@@ -21,10 +22,23 @@ exports.upload = async (req,res) => {
     });
 };
 exports.remove = async (req, res) => {
-    let image_id = req.body.public_id
+    const imageId = String(req.body.public_id || '');
+    if (!imageId) return res.status(400).json({ message: 'Image reference is required.' });
+    if (req.vendor) {
+        const ownedProduct = await Product.findOne({
+            vendorId: req.vendor._id,
+            images: { $elemMatch: { public_id: imageId } },
+        }).select('_id').exec();
+        if (!ownedProduct) return res.status(403).json({ message: 'You can only remove images used by your own products.' });
+    }
 
-    cloudinary.v2.uploader.destroy(image_id, (err, result) => {
-        if(err) return({success: false, err})
-        res.send("ok")
-    })
+    try {
+        const result = await cloudinary.v2.uploader.destroy(imageId, { resource_type: 'image' });
+        if (result.result !== 'ok' && result.result !== 'not found') {
+            return res.status(502).json({ message: 'Image could not be removed.' });
+        }
+        return res.json({ success: true });
+    } catch (error) {
+        return res.status(502).json({ message: 'Image could not be removed.' });
+    }
 }

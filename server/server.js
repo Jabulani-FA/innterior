@@ -12,6 +12,7 @@ const coupon = require("./routes/coupon")
 const product = require("./routes/product")
 const sub = require("./routes/Sub")
 const roomDesign = require("./routes/roomDesign")
+const application = require("./routes/application")
 
 const allowOrigins = [
     "https://innterior.vercel.app",
@@ -68,6 +69,7 @@ app.use("/api", cloudinary)
 app.use("/api", coupon)
 app.use("/api", product)
 app.use("/api", roomDesign)
+app.use("/api", application)
 
 //port
 const port = process.env.PORT || 8000;

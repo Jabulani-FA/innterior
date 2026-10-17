@@ -23,7 +23,7 @@ exports.adminCheck = async (req, res, next) =>{
     const {email} = req.user
 
     const adminUser = await user.findOne({email}).exec()
-    if(adminUser.role !== 'admin'){
+    if(!adminUser || adminUser.role !== 'admin'){
         res.status(403).json({
             err: "Admin resource, access denied"
         }) 
@@ -32,3 +32,17 @@ exports.adminCheck = async (req, res, next) =>{
         next()
     }
 }
+
+exports.vendorCheck = async (req, res, next) => {
+    try {
+        const { email } = req.user;
+        const vendor = await user.findOne({ email }).select('_id role vendorProfile.status').exec();
+        if (!vendor || vendor.role !== 'vendor' || vendor.vendorProfile?.status !== 'active') {
+            return res.status(403).json({ err: 'An approved, active vendor profile is required.' });
+        }
+        req.vendor = vendor;
+        return next();
+    } catch (error) {
+        return res.status(500).json({ err: 'Vendor access could not be verified.' });
+    }
+};
