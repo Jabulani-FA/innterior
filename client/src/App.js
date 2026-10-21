@@ -8,6 +8,7 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Home from "./pages/Home";
 import Header from "./components/nav/Header";
+import Footer from "./components/nav/Footer";
 import RegisterComplete from "./pages/auth/RegisterComplete";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 
@@ -102,6 +103,10 @@ const App = () => {
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/design-studio" element={<RoomStudio />} />
             <Route path="/makers" element={<MarketplaceDirectory />} />
+            <Route
+              path="/user/terms-and-conditions"
+              element={<TermsAndConditions />}
+            />
 
             {/* admin route*/}
             <Route element={<AdminRoute />}>
@@ -135,10 +140,6 @@ const App = () => {
               <Route path="/user/history" element={<History />} />
               <Route path="/user/wishlist" element={<Wishlist />} />
               <Route path="/user/password" element={<Password />} />
-              <Route
-                path="/user/terms-and-conditions"
-                element={<TermsAndConditions />}
-              />
               <Route path="/user/role-application" element={<RoleApplicationPage/>}/>
               <Route
                 path="/user/payment-management"
@@ -153,6 +154,7 @@ const App = () => {
           )}
         </Routes>
       </main>
+      <Footer isComingSoon={isComingSoon} />
     </>
   );
 };
