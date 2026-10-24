@@ -5,9 +5,10 @@ import {MailOutlined, GoogleOutlined, LoadingOutlined } from '@ant-design/icons'
 import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { Button, Space } from 'antd';
+import { Button } from 'antd';
 import { useSelector } from 'react-redux';
 import { createOrUpdateUser} from '../../functions/auth';
+import AuthShell from '../../components/auth/AuthShell';
 
 
 const Login = () => {
@@ -125,45 +126,58 @@ const Login = () => {
   }
 
   // The user fills the login form
-  const loginForm = () =>
-  <form>
-      <p>Welcome!, Log In To Your Account</p>
-      <div className='form'>
-          <input type='email' name='email' className='form-control' value={email} placeholder='Enter your Email' onChange={e => setemail(e.target.value)}/>
-      </div>
-      <div className='form'>
-          <input type='password' name='password' className='form-control' placeholder='Enter your password' value={password} onChange={e => setpassword(e.target.value)}/>
-      </div>
-      
-      {/* Different login options for the user */}
-      <Space 
-        direction="vertical"
-        style={{
-          width: '100%',
-        }}
-      >
-        {loading ? <Button type='primary' size='large' shape='round' disabled block>
-          <LoadingOutlined className='googleLogo'/>Loading
-        </Button>:<Button onClick={handleSubmit} type='primary' size='large' shape='round' disabled={!email || password.length < 6} block>
-          <MailOutlined className='googleLogo'/>Login with Email and Password
-        </Button>}
-        
-        <Button onClick={googleLogin} type='primary' danger size='large' shape='round' block>
-          <GoogleOutlined className='googleLogo'/>Login with Google
-        </Button>
-      </Space>
-  </form>
   return (
-    // The form being rendered on the login page
-    <div className='container p-5'>
-        <div className='row'>
-            <div className='col-md-6 offset-md-3'>
-              {loading ? (<h4 className='text-danger'>Loading...</h4>):(<h4>Login</h4>)}
-              {loginForm()}
-              <Link to={'/forgot/password'} className='float-right'>Forgot Password?</Link>
-            </div>   
+    <AuthShell
+      kicker="WELCOME BACK"
+      title="Good to have you home."
+      description="Sign in to pick up where your next room begins."
+      footer={<>New to Innterior? <Link to="/register">Create an account</Link></>}
+    >
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <label className="auth-field">
+          <span>Email address</span>
+          <input
+            type="email"
+            name="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setemail(e.target.value)}
+            required
+          />
+        </label>
+        <label className="auth-field">
+          <span>Password</span>
+          <input
+            type="password"
+            name="password"
+            autoComplete="current-password"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setpassword(e.target.value)}
+            minLength={6}
+            required
+          />
+        </label>
+        <div className="auth-form-meta">
+          <span>At least 6 characters</span>
+          <Link to="/forgot/password">Forgot password?</Link>
         </div>
-    </div>
+        <Button
+          htmlType="submit"
+          className="auth-submit"
+          disabled={!email || password.length < 6 || loading}
+          block
+        >
+          {loading ? <LoadingOutlined /> : <MailOutlined />}
+          {loading ? 'Signing in...' : 'Continue with email'}
+        </Button>
+        <div className="auth-divider"><span>OR</span></div>
+        <Button htmlType="button" className="auth-google" onClick={googleLogin} block>
+          <GoogleOutlined /> Continue with Google
+        </Button>
+      </form>
+    </AuthShell>
   )
 }
 

@@ -4,9 +4,9 @@ import { getIdToken, signInWithEmailLink } from 'firebase/auth'
 import {toast} from 'react-toastify'
 import { updatePassword } from 'firebase/auth'
 import { useNavigate } from 'react-router-dom'
-import { Steps} from 'antd';
 import { useSelector, useDispatch } from 'react-redux'
 import { createOrUpdateUser } from '../../functions/auth';
+import AuthShell from '../../components/auth/AuthShell';
 
 const RegisterComplete = () => {
     const [email, setemail] = useState('')
@@ -20,17 +20,9 @@ const RegisterComplete = () => {
         navigate('/')
       }
     }, [navigate, user]);
-    const items = [
-      {
-        title: 'Register',
-      },
-      {
-        title: 'Complete Registration',
-      },
-    ]
     useEffect(() => {
-      setemail(window.localStorage.getItem('emailForRegistration', email));
-    }, [email])
+      setemail(window.localStorage.getItem('emailForRegistration') || '');
+    }, [])
     
     const handleSubmit = async (e) => {
       e.preventDefault();
@@ -84,34 +76,28 @@ const RegisterComplete = () => {
       }
     };
     const RegisterCompleteForm = () =>
-        <form onSubmit={handleSubmit}>
-            <p>Complete Registration Form</p>
-            <div className='form'>
-                <input type='email' name='email' className='form-control' value={email} disabled={email.endsWith('.com')} onChange={e => setemail(e.target.value)}/>
-            </div>
-            <div className='form'>
-                <input type='password' name='password' className='form-control' placeholder='Enter your password' value={password} onChange={e => setpassword(e.target.value)}/>
-            </div>
-            <button type='submit' className='btn btn-raised'>Register</button>
+      <form className='auth-form' onSubmit={handleSubmit}>
+        <label className='auth-field'>
+          <span>Email address</span>
+                <input type='email' name='email' autoComplete='email' value={email} readOnly={Boolean(email)} onChange={e => setemail(e.target.value)} required/>
+        </label>
+        <label className='auth-field'>
+          <span>Create a password</span>
+          <input type='password' name='password' autoComplete='new-password' placeholder='At least 6 characters' value={password} onChange={e => setpassword(e.target.value)} minLength={6} required/>
+        </label>
+        <button type='submit' className='auth-submit'>Finish creating account</button>
         </form>
     
     
   return (
-    <div className='container p-5'>
-      <div className='row'>
-        <div className='col-md-6 offset-md-3'>
-          <Steps
-              direction='horizontal'
-              current={1}
-              items={items}
-              block
-              className='registerStep'
-          />
-          <h4>Complete Register</h4>
-          {RegisterCompleteForm()}
-        </div>   
-      </div>
-    </div>
+    <AuthShell
+      kicker='ONE LAST STEP'
+      title='Make yourself at home.'
+      description='Choose a password to finish creating your Innterior account.'
+      step={2}
+    >
+      {RegisterCompleteForm()}
+    </AuthShell>
   )
 }
 

@@ -1,14 +1,16 @@
-import React from 'react'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { auth } from './Firebase';
 import { toast } from 'react-toastify';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeftOutlined, ArrowRightOutlined, CheckOutlined, MailOutlined } from '@ant-design/icons';
+import AuthShell from '../../components/auth/AuthShell';
 
 const ForgotPassword = () => {
     const [email, setemail] = useState('')
     const [loading, setloading] = useState(false)
+    const [sentTo, setSentTo] = useState('')
     const navigate = useNavigate()
     const { user }  = useSelector((state) => ({...state}))
 
@@ -21,14 +23,14 @@ const ForgotPassword = () => {
         e.preventDefault();
         setloading(true)
         const config = {
-            url: 'http://localhost:3000/login',
+            url: `${window.location.origin}/login`,
             handleCodeInApp: true,
         };
         sendPasswordResetEmail(auth, email, config)
         .then(() =>{
             toast.success(`Reset link has been sent to ${email}. Click link to change password.`)
             window.localStorage.setItem('emailForPasswordReset', email);
-            // ...
+            setSentTo(email)
             setemail('')
             setloading(false)
           
@@ -40,28 +42,46 @@ const ForgotPassword = () => {
         })
     }
 
-    const ForgotPasswordForm = () =>
-        <form onSubmit={resetPassword}>
-            <p>Reset Your Password</p>
-            <div className='form' >
-                <input type='email' name='email' className='form-control' value={email} placeholder='Enter your Email' onChange={e => setemail(e.target.value)} autoFocus/>
-                <button type='submit' className='btn btn-raised' 
-                style={{
-                    width: '100%',
-                    marginTop: '20px',
-                }}
-                >Reset Password</button>
-            </div>
-        </form>    
     return (
-        <div className='container p-5'>
-            <div className='row'>
-                <div className='col-md-6 offset-md-3'>
-                    {loading?<h4 className='text-danger'>Loading...</h4>:<h4>Forgot Password</h4>}
-                    {ForgotPasswordForm()}
+        <AuthShell
+            kicker="ACCOUNT ACCESS"
+            title={sentTo ? "Your reset link is on its way." : "Let’s get you back in."}
+            description={sentTo ? `We sent password reset instructions to ${sentTo}. Follow the link in that email to choose a new password.` : "Enter the email address connected to your account and we’ll send a secure reset link."}
+            footer={<Link to="/login"><ArrowLeftOutlined /> Back to sign in</Link>}
+        >
+            {sentTo ? (
+                <div className="auth-success-state" role="status">
+                    <span className="auth-success-icon"><CheckOutlined /></span>
+                    <div>
+                        <strong>Check your email</strong>
+                        <p>If the address is registered, reset instructions will arrive shortly.</p>
+                    </div>
+                    <button className="auth-text-button" type="button" onClick={() => setSentTo('')}>
+                        Try another address <ArrowRightOutlined />
+                    </button>
                 </div>
-            </div>
-        </div>
+            ) : (
+                <form className="auth-form" onSubmit={resetPassword}>
+                    <label className="auth-field">
+                        <span>Email address</span>
+                        <input
+                            type="email"
+                            name="email"
+                            autoComplete="email"
+                            placeholder="you@example.com"
+                            value={email}
+                            onChange={(e) => setemail(e.target.value)}
+                            autoFocus
+                            required
+                        />
+                    </label>
+                    <p className="auth-field-hint"><MailOutlined /> The reset link will be sent to this address.</p>
+                    <button className="auth-submit" type="submit" disabled={!email || loading}>
+                        {loading ? 'Sending instructions...' : 'Send reset link'} <ArrowRightOutlined />
+                    </button>
+                </form>
+            )}
+        </AuthShell>
     )
 }
 
