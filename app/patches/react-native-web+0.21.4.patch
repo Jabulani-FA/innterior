@@ -1,0 +1,12 @@
+diff --git a/node_modules/react-native-web/dist/exports/ScrollView/index.js b/node_modules/react-native-web/dist/exports/ScrollView/index.js
+index 53f53d3..4c346b5 100644
+--- a/node_modules/react-native-web/dist/exports/ScrollView/index.js
++++ b/node_modules/react-native-web/dist/exports/ScrollView/index.js
+@@ -25,7 +25,6 @@ import TextInputState from '../../modules/TextInputState';
+ import UIManager from '../UIManager';
+ import View from '../View';
+ import React from 'react';
+-import warning from 'fbjs/lib/warning';
+ var emptyObject = {};
+ var IS_ANIMATING_TOUCH_START_THRESHOLD_MS = 16;
+ class ScrollView extends React.Component {

@@ -1,0 +1,1821 @@
+diff --git a/node_modules/react-native-safe-area-context/Package.swift b/node_modules/react-native-safe-area-context/Package.swift
+deleted file mode 100644
+index 5ed439f..0000000
+--- a/node_modules/react-native-safe-area-context/Package.swift
++++ /dev/null
+@@ -1,49 +0,0 @@
+-// swift-tools-version: 6.0
+-import PackageDescription
+-
+-// Swift Package Manager support for React Native's SwiftPM autolinking
+-// (react-native >= 0.87). CocoaPods users are unaffected; see the podspec.
+-// The two React Native packages are resolved by the autolinker relative to
+-// build/generated/autolinking/libs/ReactNativeSafeAreaContext in the app.
+-let package = Package(
+-    name: "ReactNativeSafeAreaContext",
+-    platforms: [.iOS(.v15)],
+-    products: [
+-        .library(name: "ReactNativeSafeAreaContext", targets: ["ReactNativeSafeAreaContext"]),
+-    ],
+-    dependencies: [
+-        .package(name: "ReactNative", path: "../../../../xcframeworks"),
+-        .package(name: "React-GeneratedCode", path: "../../../ios"),
+-    ],
+-    targets: [
+-        .target(
+-            name: "ReactNativeSafeAreaContext",
+-            dependencies: [
+-                .product(name: "ReactHeaders", package: "ReactNative"),
+-                .product(name: "ReactNativeHeaders", package: "ReactNative"),
+-                .product(name: "ReactNativeDependenciesHeaders", package: "ReactNative"),
+-                .product(name: "ReactAppHeaders", package: "React-GeneratedCode"),
+-            ],
+-            path: ".",
+-            exclude: ["ios/RNSafeAreaContext.xcodeproj"],
+-            sources: ["ios", "common/cpp"],
+-            publicHeadersPath: "ios",
+-            cSettings: [
+-                .headerSearchPath("common/cpp"),
+-                .headerSearchPath("ios"),
+-            ],
+-            cxxSettings: [
+-                .headerSearchPath("common/cpp"),
+-                .headerSearchPath("ios"),
+-                .define("DEBUG", .when(configuration: .debug)),
+-                .define("NDEBUG", .when(configuration: .release)),
+-            ],
+-            linkerSettings: [
+-                .linkedFramework("UIKit"),
+-                .linkedFramework("Foundation"),
+-                .linkedFramework("CoreGraphics"),
+-            ]
+-        ),
+-    ],
+-    cxxLanguageStandard: .cxx20
+-)
+diff --git a/node_modules/react-native-safe-area-context/android/gradle.properties b/node_modules/react-native-safe-area-context/android/gradle.properties
+deleted file mode 100644
+index ce9ec69..0000000
+--- a/node_modules/react-native-safe-area-context/android/gradle.properties
++++ /dev/null
+@@ -1 +0,0 @@
+-RNSAC_kotlinVersion=1.6.20
+diff --git a/node_modules/react-native-safe-area-context/android/src/main/AndroidManifest.xml b/node_modules/react-native-safe-area-context/android/src/main/AndroidManifest.xml
+deleted file mode 100644
+index f5da598..0000000
+--- a/node_modules/react-native-safe-area-context/android/src/main/AndroidManifest.xml
++++ /dev/null
+@@ -1,5 +0,0 @@
+-
+-<manifest
+-	xmlns:android="http://schemas.android.com/apk/res/android"
+-  package="com.th3rdwave.safeareacontext">
+-</manifest>
+diff --git a/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt b/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt
+deleted file mode 100644
+index 52450f0..0000000
+--- a/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt
++++ /dev/null
+@@ -1,87 +0,0 @@
+-cmake_minimum_required(VERSION 3.13)
+-set(CMAKE_VERBOSE_MAKEFILE ON)
+-
+-set(LIB_LITERAL safeareacontext)
+-set(LIB_TARGET_NAME react_codegen_${LIB_LITERAL})
+-
+-set(LIB_ANDROID_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
+-set(LIB_COMMON_DIR ${LIB_ANDROID_DIR}/../common/cpp)
+-set(LIB_ANDROID_GENERATED_JNI_DIR ${LIB_ANDROID_DIR}/build/generated/source/codegen/jni)
+-set(LIB_ANDROID_GENERATED_COMPONENTS_DIR ${LIB_ANDROID_GENERATED_JNI_DIR}/react/renderer/components/${LIB_LITERAL})
+-
+-file(GLOB LIB_CUSTOM_SRCS CONFIGURE_DEPENDS *.cpp ${LIB_COMMON_DIR}/react/renderer/components/${LIB_LITERAL}/*.cpp)
+-file(GLOB LIB_CODEGEN_SRCS CONFIGURE_DEPENDS ${LIB_ANDROID_GENERATED_JNI_DIR}/*.cpp ${LIB_ANDROID_GENERATED_COMPONENTS_DIR}/*.cpp)
+-
+-add_library(
+-  ${LIB_TARGET_NAME}
+-  SHARED
+-  ${LIB_CUSTOM_SRCS}
+-  ${LIB_CODEGEN_SRCS}
+-)
+-
+-target_include_directories(
+-  ${LIB_TARGET_NAME}
+-  PUBLIC
+-  .
+-  ${LIB_COMMON_DIR}
+-  ${LIB_ANDROID_GENERATED_JNI_DIR}
+-  ${LIB_ANDROID_GENERATED_COMPONENTS_DIR}
+-)
+-
+-# https://github.com/react-native-community/discussions-and-proposals/discussions/816
+-# This if-then-else can be removed once this library does not support version below 0.76
+-if (REACTNATIVE_MERGED_SO)
+-  target_link_libraries(
+-          ${LIB_TARGET_NAME}
+-          fbjni
+-          jsi
+-          reactnative
+-  )
+-else()
+-  target_link_libraries(
+-          ${LIB_TARGET_NAME}
+-          fbjni
+-          folly_runtime
+-          glog
+-          jsi
+-          react_codegen_rncore
+-          react_debug
+-          react_nativemodule_core
+-          react_render_core
+-          react_render_debug
+-          react_render_graphics
+-          react_render_mapbuffer
+-          react_render_componentregistry
+-          react_utils
+-          rrc_view
+-          turbomodulejsijni
+-          yoga
+-  )
+-endif()
+-
+-target_include_directories(
+-  ${CMAKE_PROJECT_NAME}
+-  PUBLIC
+-  ${CMAKE_CURRENT_SOURCE_DIR}
+-)
+-
+-if(ReactAndroid_VERSION_MINOR GREATER_EQUAL 80)
+-  target_compile_reactnative_options(${LIB_TARGET_NAME} PUBLIC)
+-else()
+-  target_compile_options(
+-    ${LIB_TARGET_NAME}
+-    PRIVATE
+-    -fexceptions
+-    -frtti
+-    -std=c++20
+-    -Wall
+-  )
+-endif()
+-
+-target_compile_options(
+-  ${LIB_TARGET_NAME}
+-  PRIVATE
+-  -Wpedantic
+-  -Wno-gnu-zero-variadic-macro-arguments
+-  -Wno-dollar-in-identifier-extension
+-)
+diff --git a/node_modules/react-native-safe-area-context/ios/RNSafeAreaContext.xcodeproj/project.pbxproj b/node_modules/react-native-safe-area-context/ios/RNSafeAreaContext.xcodeproj/project.pbxproj
+deleted file mode 100644
+index e002de5..0000000
+--- a/node_modules/react-native-safe-area-context/ios/RNSafeAreaContext.xcodeproj/project.pbxproj
++++ /dev/null
+@@ -1,358 +0,0 @@
+-// !$*UTF8*$!
+-{
+-	archiveVersion = 1;
+-	classes = {
+-	};
+-	objectVersion = 46;
+-	objects = {
+-
+-/* Begin PBXBuildFile section */
+-		0C7844E127C02CEE001807FB /* RNCSafeAreaViewLocalData.m in Sources */ = {isa = PBXBuildFile; fileRef = 0C7844D227C02CEE001807FB /* RNCSafeAreaViewLocalData.m */; };
+-		0C7844E227C02CEE001807FB /* RNCSafeAreaViewMode.m in Sources */ = {isa = PBXBuildFile; fileRef = 0C7844D327C02CEE001807FB /* RNCSafeAreaViewMode.m */; };
+-		0C7844E327C02CEE001807FB /* RNCSafeAreaShadowView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0C7844D527C02CEE001807FB /* RNCSafeAreaShadowView.m */; };
+-		0C7844E427C02CEE001807FB /* RNCSafeAreaProviderManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0C7844D627C02CEE001807FB /* RNCSafeAreaProviderManager.m */; };
+-		0C7844E527C02CEE001807FB /* RNCSafeAreaViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0C7844D927C02CEE001807FB /* RNCSafeAreaViewManager.m */; };
+-		0C7844E627C02CEE001807FB /* RNCSafeAreaViewEdges.m in Sources */ = {isa = PBXBuildFile; fileRef = 0C7844DE27C02CEE001807FB /* RNCSafeAreaViewEdges.m */; };
+-		0C7844E727C02CEE001807FB /* RNCSafeAreaUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 0C7844DF27C02CEE001807FB /* RNCSafeAreaUtils.m */; };
+-		0C7844E827C02CEE001807FB /* RNCSafeAreaView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0C7844E027C02CEE001807FB /* RNCSafeAreaView.m */; };
+-		0C7844EF27C02D03001807FB /* RNCSafeAreaContext.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0C7844EA27C02D03001807FB /* RNCSafeAreaContext.mm */; };
+-		0C7844F027C02D03001807FB /* RNCSafeAreaProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 0C7844ED27C02D03001807FB /* RNCSafeAreaProvider.m */; };
+-		AA53A9EE2A321C01009AB3B2 /* RNCSafeAreaViewEdgeModes.m in Sources */ = {isa = PBXBuildFile; fileRef = AA53A9ED2A321C01009AB3B2 /* RNCSafeAreaViewEdgeModes.m */; };
+-		C923EDBC220C2C1A00D3100F /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C923EDBB220C2C1A00D3100F /* SystemConfiguration.framework */; };
+-		D697AA982D6F1D0A009C6433 /* RNCChangeEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = D697AA972D6F1D08009C6433 /* RNCChangeEvent.m */; };
+-/* End PBXBuildFile section */
+-
+-/* Begin PBXCopyFilesBuildPhase section */
+-		58B511D91A9E6C8500147676 /* CopyFiles */ = {
+-			isa = PBXCopyFilesBuildPhase;
+-			buildActionMask = 2147483647;
+-			dstPath = "include/$(PRODUCT_NAME)";
+-			dstSubfolderSpec = 16;
+-			files = (
+-			);
+-			runOnlyForDeploymentPostprocessing = 0;
+-		};
+-/* End PBXCopyFilesBuildPhase section */
+-
+-/* Begin PBXFileReference section */
+-		0C7844D227C02CEE001807FB /* RNCSafeAreaViewLocalData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNCSafeAreaViewLocalData.m; sourceTree = "<group>"; };
+-		0C7844D327C02CEE001807FB /* RNCSafeAreaViewMode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNCSafeAreaViewMode.m; sourceTree = "<group>"; };
+-		0C7844D427C02CEE001807FB /* RNCSafeAreaViewLocalData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNCSafeAreaViewLocalData.h; sourceTree = "<group>"; };
+-		0C7844D527C02CEE001807FB /* RNCSafeAreaShadowView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNCSafeAreaShadowView.m; sourceTree = "<group>"; };
+-		0C7844D627C02CEE001807FB /* RNCSafeAreaProviderManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNCSafeAreaProviderManager.m; sourceTree = "<group>"; };
+-		0C7844D727C02CEE001807FB /* RNCSafeAreaShadowView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNCSafeAreaShadowView.h; sourceTree = "<group>"; };
+-		0C7844D827C02CEE001807FB /* RNCSafeAreaView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNCSafeAreaView.h; sourceTree = "<group>"; };
+-		0C7844D927C02CEE001807FB /* RNCSafeAreaViewManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNCSafeAreaViewManager.m; sourceTree = "<group>"; };
+-		0C7844DA27C02CEE001807FB /* RNCSafeAreaViewEdges.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNCSafeAreaViewEdges.h; sourceTree = "<group>"; };
+-		0C7844DB27C02CEE001807FB /* RNCSafeAreaUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNCSafeAreaUtils.h; sourceTree = "<group>"; };
+-		0C7844DC27C02CEE001807FB /* RNCSafeAreaViewMode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNCSafeAreaViewMode.h; sourceTree = "<group>"; };
+-		0C7844DD27C02CEE001807FB /* RNCSafeAreaViewManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNCSafeAreaViewManager.h; sourceTree = "<group>"; };
+-		0C7844DE27C02CEE001807FB /* RNCSafeAreaViewEdges.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNCSafeAreaViewEdges.m; sourceTree = "<group>"; };
+-		0C7844DF27C02CEE001807FB /* RNCSafeAreaUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNCSafeAreaUtils.m; sourceTree = "<group>"; };
+-		0C7844E027C02CEE001807FB /* RNCSafeAreaView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNCSafeAreaView.m; sourceTree = "<group>"; };
+-		0C7844E927C02D03001807FB /* RNCSafeAreaContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNCSafeAreaContext.h; sourceTree = "<group>"; };
+-		0C7844EA27C02D03001807FB /* RNCSafeAreaContext.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = RNCSafeAreaContext.mm; sourceTree = "<group>"; };
+-		0C7844EB27C02D03001807FB /* RNCSafeAreaProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNCSafeAreaProvider.h; sourceTree = "<group>"; };
+-		0C7844EC27C02D03001807FB /* RNCSafeAreaProviderManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNCSafeAreaProviderManager.h; sourceTree = "<group>"; };
+-		0C7844ED27C02D03001807FB /* RNCSafeAreaProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNCSafeAreaProvider.m; sourceTree = "<group>"; };
+-		0C7844EE27C02D03001807FB /* Fabric */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fabric; sourceTree = "<group>"; };
+-		134814201AA4EA6300B7C361 /* libRNCSafeAreaContext.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNCSafeAreaContext.a; sourceTree = BUILT_PRODUCTS_DIR; };
+-		AA53A9EC2A321C01009AB3B2 /* RNCSafeAreaViewEdgeModes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNCSafeAreaViewEdgeModes.h; sourceTree = "<group>"; };
+-		AA53A9ED2A321C01009AB3B2 /* RNCSafeAreaViewEdgeModes.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNCSafeAreaViewEdgeModes.m; sourceTree = "<group>"; };
+-		C923EDBB220C2C1A00D3100F /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+-		D697AA962D6F1CE5009C6433 /* RNCChangeEvent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNCChangeEvent.h; sourceTree = "<group>"; };
+-		D697AA972D6F1D08009C6433 /* RNCChangeEvent.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNCChangeEvent.m; sourceTree = "<group>"; };
+-/* End PBXFileReference section */
+-
+-/* Begin PBXFrameworksBuildPhase section */
+-		58B511D81A9E6C8500147676 /* Frameworks */ = {
+-			isa = PBXFrameworksBuildPhase;
+-			buildActionMask = 2147483647;
+-			files = (
+-				C923EDBC220C2C1A00D3100F /* SystemConfiguration.framework in Frameworks */,
+-			);
+-			runOnlyForDeploymentPostprocessing = 0;
+-		};
+-/* End PBXFrameworksBuildPhase section */
+-
+-/* Begin PBXGroup section */
+-		134814211AA4EA7D00B7C361 /* Products */ = {
+-			isa = PBXGroup;
+-			children = (
+-				134814201AA4EA6300B7C361 /* libRNCSafeAreaContext.a */,
+-			);
+-			name = Products;
+-			sourceTree = "<group>";
+-		};
+-		58B511D21A9E6C8500147676 = {
+-			isa = PBXGroup;
+-			children = (
+-				D697AA972D6F1D08009C6433 /* RNCChangeEvent.m */,
+-				D697AA962D6F1CE5009C6433 /* RNCChangeEvent.h */,
+-				AA53A9EC2A321C01009AB3B2 /* RNCSafeAreaViewEdgeModes.h */,
+-				AA53A9ED2A321C01009AB3B2 /* RNCSafeAreaViewEdgeModes.m */,
+-				0C7844EE27C02D03001807FB /* Fabric */,
+-				0C7844E927C02D03001807FB /* RNCSafeAreaContext.h */,
+-				0C7844EA27C02D03001807FB /* RNCSafeAreaContext.mm */,
+-				0C7844EB27C02D03001807FB /* RNCSafeAreaProvider.h */,
+-				0C7844ED27C02D03001807FB /* RNCSafeAreaProvider.m */,
+-				0C7844EC27C02D03001807FB /* RNCSafeAreaProviderManager.h */,
+-				0C7844D627C02CEE001807FB /* RNCSafeAreaProviderManager.m */,
+-				0C7844D727C02CEE001807FB /* RNCSafeAreaShadowView.h */,
+-				0C7844D527C02CEE001807FB /* RNCSafeAreaShadowView.m */,
+-				0C7844DB27C02CEE001807FB /* RNCSafeAreaUtils.h */,
+-				0C7844DF27C02CEE001807FB /* RNCSafeAreaUtils.m */,
+-				0C7844D827C02CEE001807FB /* RNCSafeAreaView.h */,
+-				0C7844E027C02CEE001807FB /* RNCSafeAreaView.m */,
+-				0C7844DA27C02CEE001807FB /* RNCSafeAreaViewEdges.h */,
+-				0C7844DE27C02CEE001807FB /* RNCSafeAreaViewEdges.m */,
+-				0C7844D427C02CEE001807FB /* RNCSafeAreaViewLocalData.h */,
+-				0C7844D227C02CEE001807FB /* RNCSafeAreaViewLocalData.m */,
+-				0C7844DD27C02CEE001807FB /* RNCSafeAreaViewManager.h */,
+-				0C7844D927C02CEE001807FB /* RNCSafeAreaViewManager.m */,
+-				0C7844DC27C02CEE001807FB /* RNCSafeAreaViewMode.h */,
+-				0C7844D327C02CEE001807FB /* RNCSafeAreaViewMode.m */,
+-				134814211AA4EA7D00B7C361 /* Products */,
+-				C923EDBA220C2C1A00D3100F /* Frameworks */,
+-			);
+-			sourceTree = "<group>";
+-		};
+-		C923EDBA220C2C1A00D3100F /* Frameworks */ = {
+-			isa = PBXGroup;
+-			children = (
+-				C923EDBB220C2C1A00D3100F /* SystemConfiguration.framework */,
+-			);
+-			name = Frameworks;
+-			sourceTree = "<group>";
+-		};
+-/* End PBXGroup section */
+-
+-/* Begin PBXNativeTarget section */
+-		58B511DA1A9E6C8500147676 /* RNCSafeAreaContext */ = {
+-			isa = PBXNativeTarget;
+-			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RNCSafeAreaContext" */;
+-			buildPhases = (
+-				58B511D71A9E6C8500147676 /* Sources */,
+-				58B511D81A9E6C8500147676 /* Frameworks */,
+-				58B511D91A9E6C8500147676 /* CopyFiles */,
+-			);
+-			buildRules = (
+-			);
+-			dependencies = (
+-			);
+-			name = RNCSafeAreaContext;
+-			productName = RCTDataManager;
+-			productReference = 134814201AA4EA6300B7C361 /* libRNCSafeAreaContext.a */;
+-			productType = "com.apple.product-type.library.static";
+-		};
+-/* End PBXNativeTarget section */
+-
+-/* Begin PBXProject section */
+-		58B511D31A9E6C8500147676 /* Project object */ = {
+-			isa = PBXProject;
+-			attributes = {
+-				LastUpgradeCheck = 1030;
+-				ORGANIZATIONNAME = Facebook;
+-				TargetAttributes = {
+-					58B511DA1A9E6C8500147676 = {
+-						CreatedOnToolsVersion = 6.1.1;
+-					};
+-				};
+-			};
+-			buildConfigurationList = 58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "RNSafeAreaContext" */;
+-			compatibilityVersion = "Xcode 3.2";
+-			developmentRegion = en;
+-			hasScannedForEncodings = 0;
+-			knownRegions = (
+-				en,
+-				Base,
+-			);
+-			mainGroup = 58B511D21A9E6C8500147676;
+-			productRefGroup = 58B511D21A9E6C8500147676;
+-			projectDirPath = "";
+-			projectRoot = "";
+-			targets = (
+-				58B511DA1A9E6C8500147676 /* RNCSafeAreaContext */,
+-			);
+-		};
+-/* End PBXProject section */
+-
+-/* Begin PBXSourcesBuildPhase section */
+-		58B511D71A9E6C8500147676 /* Sources */ = {
+-			isa = PBXSourcesBuildPhase;
+-			buildActionMask = 2147483647;
+-			files = (
+-				AA53A9EE2A321C01009AB3B2 /* RNCSafeAreaViewEdgeModes.m in Sources */,
+-				0C7844E427C02CEE001807FB /* RNCSafeAreaProviderManager.m in Sources */,
+-				0C7844E727C02CEE001807FB /* RNCSafeAreaUtils.m in Sources */,
+-				0C7844E827C02CEE001807FB /* RNCSafeAreaView.m in Sources */,
+-				0C7844E627C02CEE001807FB /* RNCSafeAreaViewEdges.m in Sources */,
+-				0C7844E527C02CEE001807FB /* RNCSafeAreaViewManager.m in Sources */,
+-				D697AA982D6F1D0A009C6433 /* RNCChangeEvent.m in Sources */,
+-				0C7844EF27C02D03001807FB /* RNCSafeAreaContext.mm in Sources */,
+-				0C7844E127C02CEE001807FB /* RNCSafeAreaViewLocalData.m in Sources */,
+-				0C7844E227C02CEE001807FB /* RNCSafeAreaViewMode.m in Sources */,
+-				0C7844F027C02D03001807FB /* RNCSafeAreaProvider.m in Sources */,
+-				0C7844E327C02CEE001807FB /* RNCSafeAreaShadowView.m in Sources */,
+-			);
+-			runOnlyForDeploymentPostprocessing = 0;
+-		};
+-/* End PBXSourcesBuildPhase section */
+-
+-/* Begin XCBuildConfiguration section */
+-		58B511ED1A9E6C8500147676 /* Debug */ = {
+-			isa = XCBuildConfiguration;
+-			buildSettings = {
+-				ALWAYS_SEARCH_USER_PATHS = NO;
+-				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+-				CLANG_CXX_LIBRARY = "libc++";
+-				CLANG_ENABLE_MODULES = YES;
+-				CLANG_ENABLE_OBJC_ARC = YES;
+-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+-				CLANG_WARN_BOOL_CONVERSION = YES;
+-				CLANG_WARN_COMMA = YES;
+-				CLANG_WARN_CONSTANT_CONVERSION = YES;
+-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+-				CLANG_WARN_EMPTY_BODY = YES;
+-				CLANG_WARN_ENUM_CONVERSION = YES;
+-				CLANG_WARN_INFINITE_RECURSION = YES;
+-				CLANG_WARN_INT_CONVERSION = YES;
+-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+-				CLANG_WARN_STRICT_PROTOTYPES = YES;
+-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+-				CLANG_WARN_UNREACHABLE_CODE = YES;
+-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+-				COPY_PHASE_STRIP = NO;
+-				ENABLE_STRICT_OBJC_MSGSEND = YES;
+-				ENABLE_TESTABILITY = YES;
+-				GCC_C_LANGUAGE_STANDARD = gnu99;
+-				GCC_DYNAMIC_NO_PIC = NO;
+-				GCC_NO_COMMON_BLOCKS = YES;
+-				GCC_OPTIMIZATION_LEVEL = 0;
+-				GCC_PREPROCESSOR_DEFINITIONS = (
+-					"DEBUG=1",
+-					"$(inherited)",
+-				);
+-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+-				GCC_WARN_UNDECLARED_SELECTOR = YES;
+-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+-				GCC_WARN_UNUSED_FUNCTION = YES;
+-				GCC_WARN_UNUSED_VARIABLE = YES;
+-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+-				MTL_ENABLE_DEBUG_INFO = YES;
+-				ONLY_ACTIVE_ARCH = YES;
+-				SDKROOT = iphoneos;
+-			};
+-			name = Debug;
+-		};
+-		58B511EE1A9E6C8500147676 /* Release */ = {
+-			isa = XCBuildConfiguration;
+-			buildSettings = {
+-				ALWAYS_SEARCH_USER_PATHS = NO;
+-				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+-				CLANG_CXX_LIBRARY = "libc++";
+-				CLANG_ENABLE_MODULES = YES;
+-				CLANG_ENABLE_OBJC_ARC = YES;
+-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+-				CLANG_WARN_BOOL_CONVERSION = YES;
+-				CLANG_WARN_COMMA = YES;
+-				CLANG_WARN_CONSTANT_CONVERSION = YES;
+-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+-				CLANG_WARN_EMPTY_BODY = YES;
+-				CLANG_WARN_ENUM_CONVERSION = YES;
+-				CLANG_WARN_INFINITE_RECURSION = YES;
+-				CLANG_WARN_INT_CONVERSION = YES;
+-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+-				CLANG_WARN_STRICT_PROTOTYPES = YES;
+-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+-				CLANG_WARN_UNREACHABLE_CODE = YES;
+-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+-				COPY_PHASE_STRIP = YES;
+-				ENABLE_NS_ASSERTIONS = NO;
+-				ENABLE_STRICT_OBJC_MSGSEND = YES;
+-				GCC_C_LANGUAGE_STANDARD = gnu99;
+-				GCC_NO_COMMON_BLOCKS = YES;
+-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+-				GCC_WARN_UNDECLARED_SELECTOR = YES;
+-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+-				GCC_WARN_UNUSED_FUNCTION = YES;
+-				GCC_WARN_UNUSED_VARIABLE = YES;
+-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+-				MTL_ENABLE_DEBUG_INFO = NO;
+-				SDKROOT = iphoneos;
+-				VALIDATE_PRODUCT = YES;
+-			};
+-			name = Release;
+-		};
+-		58B511F01A9E6C8500147676 /* Debug */ = {
+-			isa = XCBuildConfiguration;
+-			buildSettings = {
+-				HEADER_SEARCH_PATHS = (
+-					"$(inherited)",
+-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+-					"$(SRCROOT)/../../../React/**",
+-					"$(SRCROOT)/../../react-native/React/**",
+-				);
+-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+-				OTHER_LDFLAGS = "-ObjC";
+-				PRODUCT_NAME = RNCSafeAreaContext;
+-				SKIP_INSTALL = YES;
+-			};
+-			name = Debug;
+-		};
+-		58B511F11A9E6C8500147676 /* Release */ = {
+-			isa = XCBuildConfiguration;
+-			buildSettings = {
+-				HEADER_SEARCH_PATHS = (
+-					"$(inherited)",
+-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+-					"$(SRCROOT)/../../../React/**",
+-					"$(SRCROOT)/../../react-native/React/**",
+-				);
+-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+-				OTHER_LDFLAGS = "-ObjC";
+-				PRODUCT_NAME = RNCSafeAreaContext;
+-				SKIP_INSTALL = YES;
+-			};
+-			name = Release;
+-		};
+-/* End XCBuildConfiguration section */
+-
+-/* Begin XCConfigurationList section */
+-		58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "RNSafeAreaContext" */ = {
+-			isa = XCConfigurationList;
+-			buildConfigurations = (
+-				58B511ED1A9E6C8500147676 /* Debug */,
+-				58B511EE1A9E6C8500147676 /* Release */,
+-			);
+-			defaultConfigurationIsVisible = 0;
+-			defaultConfigurationName = Release;
+-		};
+-		58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RNCSafeAreaContext" */ = {
+-			isa = XCConfigurationList;
+-			buildConfigurations = (
+-				58B511F01A9E6C8500147676 /* Debug */,
+-				58B511F11A9E6C8500147676 /* Release */,
+-			);
+-			defaultConfigurationIsVisible = 0;
+-			defaultConfigurationName = Release;
+-		};
+-/* End XCConfigurationList section */
+-	};
+-	rootObject = 58B511D31A9E6C8500147676 /* Project object */;
+-}
+diff --git a/node_modules/react-native-safe-area-context/jest/mock.d.ts b/node_modules/react-native-safe-area-context/jest/mock.d.ts
+deleted file mode 100644
+index 58971b6..0000000
+--- a/node_modules/react-native-safe-area-context/jest/mock.d.ts
++++ /dev/null
+@@ -1 +0,0 @@
+-export { default } from '../lib/typescript/src/jest/mock';
+diff --git a/node_modules/react-native-safe-area-context/lib/module/specs/NativeSafeAreaProvider.js b/node_modules/react-native-safe-area-context/lib/module/specs/NativeSafeAreaProvider.js
+index c3d906c..4c522bd 100644
+--- a/node_modules/react-native-safe-area-context/lib/module/specs/NativeSafeAreaProvider.js
++++ b/node_modules/react-native-safe-area-context/lib/module/specs/NativeSafeAreaProvider.js
+@@ -1,3 +1,3 @@
+-import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
+-export default codegenNativeComponent('RNCSafeAreaProvider');
++import { requireNativeComponent } from 'react-native';
++export default requireNativeComponent('RNCSafeAreaProvider');
+ //# sourceMappingURL=NativeSafeAreaProvider.js.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-safe-area-context/lib/module/specs/NativeSafeAreaView.js b/node_modules/react-native-safe-area-context/lib/module/specs/NativeSafeAreaView.js
+index 15034bc..0cfe532 100644
+--- a/node_modules/react-native-safe-area-context/lib/module/specs/NativeSafeAreaView.js
++++ b/node_modules/react-native-safe-area-context/lib/module/specs/NativeSafeAreaView.js
+@@ -1,5 +1,3 @@
+-import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
+-export default codegenNativeComponent('RNCSafeAreaView', {
+-  interfaceOnly: true
+-});
++import { requireNativeComponent } from 'react-native';
++export default requireNativeComponent('RNCSafeAreaView');
+ //# sourceMappingURL=NativeSafeAreaView.js.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-safe-area-context/lib/typescript/src/CompatNativeSafeAreaProvider.d.ts b/node_modules/react-native-safe-area-context/lib/typescript/src/CompatNativeSafeAreaProvider.d.ts
+deleted file mode 100644
+index b333588..0000000
+--- a/node_modules/react-native-safe-area-context/lib/typescript/src/CompatNativeSafeAreaProvider.d.ts
++++ /dev/null
+@@ -1,4 +0,0 @@
+-import * as React from 'react';
+-import type { NativeSafeAreaProviderProps } from './SafeArea.types';
+-export declare function CompatNativeSafeAreaProvider({ children, style, onInsetsChange, ref, }: NativeSafeAreaProviderProps): React.JSX.Element;
+-//# sourceMappingURL=CompatNativeSafeAreaProvider.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-safe-area-context/lib/typescript/src/InitialWindow.d.ts b/node_modules/react-native-safe-area-context/lib/typescript/src/InitialWindow.d.ts
+deleted file mode 100644
+index fdb7005..0000000
+--- a/node_modules/react-native-safe-area-context/lib/typescript/src/InitialWindow.d.ts
++++ /dev/null
+@@ -1,7 +0,0 @@
+-import type { EdgeInsets, Metrics } from './SafeArea.types';
+-export declare const initialWindowMetrics: Metrics | null;
+-/**
+- * @deprecated
+- */
+-export declare const initialWindowSafeAreaInsets: EdgeInsets | null;
+-//# sourceMappingURL=InitialWindow.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-safe-area-context/lib/typescript/src/InitialWindow.native.d.ts b/node_modules/react-native-safe-area-context/lib/typescript/src/InitialWindow.native.d.ts
+deleted file mode 100644
+index 7635b90..0000000
+--- a/node_modules/react-native-safe-area-context/lib/typescript/src/InitialWindow.native.d.ts
++++ /dev/null
+@@ -1,7 +0,0 @@
+-import type { Metrics } from './SafeArea.types';
+-export declare const initialWindowMetrics: Metrics | null;
+-/**
+- * @deprecated
+- */
+-export declare const initialWindowSafeAreaInsets: import("./SafeArea.types").EdgeInsets | undefined;
+-//# sourceMappingURL=InitialWindow.native.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-safe-area-context/lib/typescript/src/NativeSafeAreaProvider.d.ts b/node_modules/react-native-safe-area-context/lib/typescript/src/NativeSafeAreaProvider.d.ts
+deleted file mode 100644
+index a6db59c..0000000
+--- a/node_modules/react-native-safe-area-context/lib/typescript/src/NativeSafeAreaProvider.d.ts
++++ /dev/null
+@@ -1,3 +0,0 @@
+-import NativeSafeAreaProvider from './specs/NativeSafeAreaProvider';
+-export { NativeSafeAreaProvider };
+-//# sourceMappingURL=NativeSafeAreaProvider.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-safe-area-context/lib/typescript/src/NativeSafeAreaProvider.web.d.ts b/node_modules/react-native-safe-area-context/lib/typescript/src/NativeSafeAreaProvider.web.d.ts
+deleted file mode 100644
+index 7047973..0000000
+--- a/node_modules/react-native-safe-area-context/lib/typescript/src/NativeSafeAreaProvider.web.d.ts
++++ /dev/null
+@@ -1,4 +0,0 @@
+-import * as React from 'react';
+-import type { NativeSafeAreaProviderProps } from './SafeArea.types';
+-export declare function NativeSafeAreaProvider({ children, style, onInsetsChange, ref, }: NativeSafeAreaProviderProps): React.JSX.Element;
+-//# sourceMappingURL=NativeSafeAreaProvider.web.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-safe-area-context/lib/typescript/src/NativeSafeAreaProvider.windows.d.ts b/node_modules/react-native-safe-area-context/lib/typescript/src/NativeSafeAreaProvider.windows.d.ts
+deleted file mode 100644
+index f8ff978..0000000
+--- a/node_modules/react-native-safe-area-context/lib/typescript/src/NativeSafeAreaProvider.windows.d.ts
++++ /dev/null
+@@ -1,2 +0,0 @@
+-export { CompatNativeSafeAreaProvider as NativeSafeAreaProvider } from './CompatNativeSafeAreaProvider';
+-//# sourceMappingURL=NativeSafeAreaProvider.windows.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-safe-area-context/lib/typescript/src/SafeArea.types.d.ts b/node_modules/react-native-safe-area-context/lib/typescript/src/SafeArea.types.d.ts
+deleted file mode 100644
+index b56a2b8..0000000
+--- a/node_modules/react-native-safe-area-context/lib/typescript/src/SafeArea.types.d.ts
++++ /dev/null
+@@ -1,37 +0,0 @@
+-import type * as React from 'react';
+-import type { NativeSyntheticEvent, View, ViewProps } from 'react-native';
+-import NativeSafeAreaView from './specs/NativeSafeAreaView';
+-export type Edge = 'top' | 'right' | 'bottom' | 'left';
+-export type EdgeMode = 'off' | 'additive' | 'maximum';
+-export type EdgeRecord = Partial<Record<Edge, EdgeMode>>;
+-export type Edges = readonly Edge[] | Readonly<EdgeRecord>;
+-export interface EdgeInsets {
+-    top: number;
+-    right: number;
+-    bottom: number;
+-    left: number;
+-}
+-export interface Rect {
+-    x: number;
+-    y: number;
+-    width: number;
+-    height: number;
+-}
+-export interface Metrics {
+-    insets: EdgeInsets;
+-    frame: Rect;
+-}
+-export type InsetChangedEvent = NativeSyntheticEvent<Metrics>;
+-export type InsetChangeNativeCallback = (event: InsetChangedEvent) => void;
+-export interface NativeSafeAreaProviderProps extends ViewProps {
+-    ref?: React.Ref<View>;
+-    children?: React.ReactNode;
+-    onInsetsChange: InsetChangeNativeCallback;
+-}
+-export interface NativeSafeAreaViewProps extends ViewProps {
+-    children?: React.ReactNode;
+-    mode?: 'padding' | 'margin';
+-    edges?: Edges;
+-}
+-export type NativeSafeAreaViewInstance = InstanceType<typeof NativeSafeAreaView>;
+-//# sourceMappingURL=SafeArea.types.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-safe-area-context/lib/typescript/src/SafeAreaContext.d.ts b/node_modules/react-native-safe-area-context/lib/typescript/src/SafeAreaContext.d.ts
+deleted file mode 100644
+index d088324..0000000
+--- a/node_modules/react-native-safe-area-context/lib/typescript/src/SafeAreaContext.d.ts
++++ /dev/null
+@@ -1,41 +0,0 @@
+-import * as React from 'react';
+-import { type View, type ViewProps } from 'react-native';
+-import type { EdgeInsets, Metrics, Rect } from './SafeArea.types';
+-export declare const SafeAreaInsetsContext: React.Context<EdgeInsets | null>;
+-export declare const SafeAreaFrameContext: React.Context<Rect | null>;
+-export interface SafeAreaProviderProps extends ViewProps {
+-    ref?: React.Ref<View>;
+-    children?: React.ReactNode;
+-    initialMetrics?: Metrics | null;
+-    /**
+-     * @deprecated
+-     */
+-    initialSafeAreaInsets?: EdgeInsets | null;
+-}
+-export declare function SafeAreaProvider({ children, initialMetrics, initialSafeAreaInsets, style, ref, ...others }: SafeAreaProviderProps): React.JSX.Element;
+-export interface SafeAreaListenerProps extends ViewProps {
+-    onChange: (data: {
+-        insets: EdgeInsets;
+-        frame: Rect;
+-    }) => void;
+-}
+-export declare function SafeAreaListener({ onChange, style, children, ...others }: SafeAreaListenerProps): React.JSX.Element;
+-export declare function useSafeAreaInsets(): EdgeInsets;
+-export declare function useSafeAreaFrame(): Rect;
+-export type WithSafeAreaInsetsProps = {
+-    insets: EdgeInsets;
+-};
+-export declare function withSafeAreaInsets<T>(WrappedComponent: React.ComponentType<(React.PropsWithoutRef<T> | T) & WithSafeAreaInsetsProps>): React.ForwardRefExoticComponent<React.PropsWithoutRef<T> & React.RefAttributes<unknown>>;
+-/**
+- * @deprecated
+- */
+-export declare function useSafeArea(): EdgeInsets;
+-/**
+- * @deprecated
+- */
+-export declare const SafeAreaConsumer: React.Consumer<EdgeInsets | null>;
+-/**
+- * @deprecated
+- */
+-export declare const SafeAreaContext: React.Context<EdgeInsets | null>;
+-//# sourceMappingURL=SafeAreaContext.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-safe-area-context/lib/typescript/src/SafeAreaView.d.ts b/node_modules/react-native-safe-area-context/lib/typescript/src/SafeAreaView.d.ts
+deleted file mode 100644
+index 067768c..0000000
+--- a/node_modules/react-native-safe-area-context/lib/typescript/src/SafeAreaView.d.ts
++++ /dev/null
+@@ -1,5 +0,0 @@
+-import * as React from 'react';
+-import type { NativeSafeAreaViewProps } from './SafeArea.types';
+-export type SafeAreaViewProps = NativeSafeAreaViewProps;
+-export declare const SafeAreaView: React.ForwardRefExoticComponent<NativeSafeAreaViewProps & React.RefAttributes<React.Component<import("./specs/NativeSafeAreaView").NativeProps, {}, any> & import("react-native").ReactNativeElement>>;
+-//# sourceMappingURL=SafeAreaView.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-safe-area-context/lib/typescript/src/SafeAreaView.web.d.ts b/node_modules/react-native-safe-area-context/lib/typescript/src/SafeAreaView.web.d.ts
+deleted file mode 100644
+index f7637e2..0000000
+--- a/node_modules/react-native-safe-area-context/lib/typescript/src/SafeAreaView.web.d.ts
++++ /dev/null
+@@ -1,4 +0,0 @@
+-import * as React from 'react';
+-import { NativeSafeAreaViewProps } from './SafeArea.types';
+-export declare const SafeAreaView: React.ForwardRefExoticComponent<NativeSafeAreaViewProps & React.RefAttributes<React.Component<import("./specs/NativeSafeAreaView").NativeProps, {}, any> & import("react-native").ReactNativeElement>>;
+-//# sourceMappingURL=SafeAreaView.web.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-safe-area-context/lib/typescript/src/SafeAreaView.windows.d.ts b/node_modules/react-native-safe-area-context/lib/typescript/src/SafeAreaView.windows.d.ts
+deleted file mode 100644
+index ad4ff5a..0000000
+--- a/node_modules/react-native-safe-area-context/lib/typescript/src/SafeAreaView.windows.d.ts
++++ /dev/null
+@@ -1,3 +0,0 @@
+-import type { NativeSafeAreaViewInstance } from './SafeArea.types';
+-export declare const SafeAreaView: NativeSafeAreaViewInstance;
+-//# sourceMappingURL=SafeAreaView.windows.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-safe-area-context/lib/typescript/src/index.d.ts b/node_modules/react-native-safe-area-context/lib/typescript/src/index.d.ts
+deleted file mode 100644
+index 225e006..0000000
+--- a/node_modules/react-native-safe-area-context/lib/typescript/src/index.d.ts
++++ /dev/null
+@@ -1,5 +0,0 @@
+-export * from './SafeAreaContext';
+-export * from './SafeAreaView';
+-export * from './InitialWindow';
+-export * from './SafeArea.types';
+-//# sourceMappingURL=index.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-safe-area-context/lib/typescript/src/jest/mock.d.ts b/node_modules/react-native-safe-area-context/lib/typescript/src/jest/mock.d.ts
+deleted file mode 100644
+index 9f9f57b..0000000
+--- a/node_modules/react-native-safe-area-context/lib/typescript/src/jest/mock.d.ts
++++ /dev/null
+@@ -1,13 +0,0 @@
+-import React from 'react';
+-import type { Metrics } from '../SafeArea.types';
+-import type { SafeAreaProviderProps, SafeAreaInsetsContext, SafeAreaFrameContext } from '../SafeAreaContext';
+-declare const _default: {
+-    initialWindowMetrics: Metrics;
+-    useSafeAreaInsets: import("jest-mock").Mock<() => import("../SafeArea.types").EdgeInsets>;
+-    useSafeAreaFrame: import("jest-mock").Mock<() => import("../SafeArea.types").Rect>;
+-    SafeAreaProvider: ({ children, initialMetrics }: SafeAreaProviderProps) => React.JSX.Element;
+-    SafeAreaInsetsContext: typeof SafeAreaInsetsContext;
+-    SafeAreaFrameContext: typeof SafeAreaFrameContext;
+-};
+-export default _default;
+-//# sourceMappingURL=mock.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-safe-area-context/lib/typescript/src/specs/NativeSafeAreaContext.d.ts b/node_modules/react-native-safe-area-context/lib/typescript/src/specs/NativeSafeAreaContext.d.ts
+deleted file mode 100644
+index 8a4baf0..0000000
+--- a/node_modules/react-native-safe-area-context/lib/typescript/src/specs/NativeSafeAreaContext.d.ts
++++ /dev/null
+@@ -1,23 +0,0 @@
+-import { TurboModule } from 'react-native';
+-import type { Double } from 'react-native/Libraries/Types/CodegenTypes';
+-export interface Spec extends TurboModule {
+-    getConstants: () => {
+-        initialWindowMetrics?: {
+-            insets: {
+-                top: Double;
+-                right: Double;
+-                bottom: Double;
+-                left: Double;
+-            };
+-            frame: {
+-                x: Double;
+-                y: Double;
+-                width: Double;
+-                height: Double;
+-            };
+-        };
+-    };
+-}
+-declare const _default: Spec | null;
+-export default _default;
+-//# sourceMappingURL=NativeSafeAreaContext.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-safe-area-context/lib/typescript/src/specs/NativeSafeAreaProvider.d.ts b/node_modules/react-native-safe-area-context/lib/typescript/src/specs/NativeSafeAreaProvider.d.ts
+deleted file mode 100644
+index 50c6bff..0000000
+--- a/node_modules/react-native-safe-area-context/lib/typescript/src/specs/NativeSafeAreaProvider.d.ts
++++ /dev/null
+@@ -1,22 +0,0 @@
+-import type { DirectEventHandler, Double } from 'react-native/Libraries/Types/CodegenTypes';
+-import type { ViewProps, HostComponent } from 'react-native';
+-export type Event = Readonly<{
+-    insets: Readonly<{
+-        top: Double;
+-        right: Double;
+-        bottom: Double;
+-        left: Double;
+-    }>;
+-    frame: Readonly<{
+-        x: Double;
+-        y: Double;
+-        width: Double;
+-        height: Double;
+-    }>;
+-}>;
+-export interface NativeProps extends ViewProps {
+-    onInsetsChange?: DirectEventHandler<Event>;
+-}
+-declare const _default: HostComponent<NativeProps>;
+-export default _default;
+-//# sourceMappingURL=NativeSafeAreaProvider.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-safe-area-context/lib/typescript/src/specs/NativeSafeAreaView.d.ts b/node_modules/react-native-safe-area-context/lib/typescript/src/specs/NativeSafeAreaView.d.ts
+deleted file mode 100644
+index 7dc923a..0000000
+--- a/node_modules/react-native-safe-area-context/lib/typescript/src/specs/NativeSafeAreaView.d.ts
++++ /dev/null
+@@ -1,14 +0,0 @@
+-import type { WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
+-import type { ViewProps, HostComponent } from 'react-native';
+-export interface NativeProps extends ViewProps {
+-    mode?: WithDefault<'padding' | 'margin', 'padding'>;
+-    edges?: Readonly<{
+-        top: string;
+-        right: string;
+-        bottom: string;
+-        left: string;
+-    }>;
+-}
+-declare const _default: HostComponent<NativeProps>;
+-export default _default;
+-//# sourceMappingURL=NativeSafeAreaView.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-safe-area-context/react-native-safe-area-context.podspec b/node_modules/react-native-safe-area-context/react-native-safe-area-context.podspec
+deleted file mode 100644
+index 078def5..0000000
+--- a/node_modules/react-native-safe-area-context/react-native-safe-area-context.podspec
++++ /dev/null
+@@ -1,41 +0,0 @@
+-require 'json'
+-
+-fabric_enabled = ENV['RCT_NEW_ARCH_ENABLED'] == '1'
+-
+-package = JSON.parse(File.read(File.join(__dir__, 'package.json')))
+-
+-Pod::Spec.new do |s|
+-  s.name         = "react-native-safe-area-context"
+-  s.version      = package['version']
+-  s.summary      = package['description']
+-  s.license      = package['license']
+-
+-  s.authors      = package['author']
+-  s.homepage     = package['homepage']
+-  s.ios.deployment_target = "12.4"
+-  s.osx.deployment_target = "10.15"
+-  s.tvos.deployment_target = "12.4"
+-  s.visionos.deployment_target = "1.0"
+-
+-  s.source       = { :git => "https://github.com/AppAndFlow/react-native-safe-area-context.git", :tag => "v#{s.version}" }
+-  s.source_files  = "ios/**/*.{h,m,mm}"
+-  s.exclude_files = "ios/Fabric"
+-
+-  s.dependency "React-Core"
+-
+-  if fabric_enabled
+-    install_modules_dependencies(s)
+-
+-    s.subspec "common" do |ss|
+-      ss.source_files         = "common/cpp/**/*.{cpp,h}"
+-      ss.header_dir           = "react/renderer/components/safeareacontext"
+-      ss.pod_target_xcconfig  = { "HEADER_SEARCH_PATHS" => "\"$(PODS_TARGET_SRCROOT)/common/cpp\"" }
+-    end
+-
+-    s.subspec "fabric" do |ss|
+-      ss.dependency "react-native-safe-area-context/common"
+-      ss.source_files         = "ios/Fabric/**/*.{h,m,mm}"
+-      ss.pod_target_xcconfig  = { "HEADER_SEARCH_PATHS" => "\"$(PODS_TARGET_SRCROOT)/common/cpp\"" }
+-    end
+-  end
+-end
+diff --git a/node_modules/react-native-safe-area-context/src/CompatNativeSafeAreaProvider.tsx b/node_modules/react-native-safe-area-context/src/CompatNativeSafeAreaProvider.tsx
+deleted file mode 100644
+index 9615371..0000000
+--- a/node_modules/react-native-safe-area-context/src/CompatNativeSafeAreaProvider.tsx
++++ /dev/null
+@@ -1,33 +0,0 @@
+-import * as React from 'react';
+-import { useWindowDimensions, View } from 'react-native';
+-import type { NativeSafeAreaProviderProps } from './SafeArea.types';
+-
+-export function CompatNativeSafeAreaProvider({
+-  children,
+-  style,
+-  onInsetsChange,
+-  ref,
+-}: NativeSafeAreaProviderProps) {
+-  const window = useWindowDimensions();
+-  React.useEffect(() => {
+-    const insets = {
+-      top: 0,
+-      bottom: 0,
+-      left: 0,
+-      right: 0,
+-    };
+-    const frame = {
+-      x: 0,
+-      y: 0,
+-      width: window.width,
+-      height: window.height,
+-    };
+-    // @ts-ignore: missing properties
+-    onInsetsChange({ nativeEvent: { insets, frame } });
+-  }, [onInsetsChange, window.height, window.width]);
+-  return (
+-    <View ref={ref} style={style}>
+-      {children}
+-    </View>
+-  );
+-}
+diff --git a/node_modules/react-native-safe-area-context/src/InitialWindow.native.ts b/node_modules/react-native-safe-area-context/src/InitialWindow.native.ts
+deleted file mode 100644
+index 5ff9684..0000000
+--- a/node_modules/react-native-safe-area-context/src/InitialWindow.native.ts
++++ /dev/null
+@@ -1,10 +0,0 @@
+-import type { Metrics } from './SafeArea.types';
+-import NativeSafeAreaContext from './specs/NativeSafeAreaContext';
+-
+-export const initialWindowMetrics = (NativeSafeAreaContext?.getConstants?.()
+-  ?.initialWindowMetrics ?? null) as Metrics | null;
+-
+-/**
+- * @deprecated
+- */
+-export const initialWindowSafeAreaInsets = initialWindowMetrics?.insets;
+diff --git a/node_modules/react-native-safe-area-context/src/InitialWindow.ts b/node_modules/react-native-safe-area-context/src/InitialWindow.ts
+deleted file mode 100644
+index b973096..0000000
+--- a/node_modules/react-native-safe-area-context/src/InitialWindow.ts
++++ /dev/null
+@@ -1,8 +0,0 @@
+-import type { EdgeInsets, Metrics } from './SafeArea.types';
+-
+-export const initialWindowMetrics: Metrics | null = null;
+-
+-/**
+- * @deprecated
+- */
+-export const initialWindowSafeAreaInsets: EdgeInsets | null = null;
+diff --git a/node_modules/react-native-safe-area-context/src/NativeSafeAreaProvider.tsx b/node_modules/react-native-safe-area-context/src/NativeSafeAreaProvider.tsx
+deleted file mode 100644
+index d078d06..0000000
+--- a/node_modules/react-native-safe-area-context/src/NativeSafeAreaProvider.tsx
++++ /dev/null
+@@ -1,3 +0,0 @@
+-import NativeSafeAreaProvider from './specs/NativeSafeAreaProvider';
+-
+-export { NativeSafeAreaProvider };
+diff --git a/node_modules/react-native-safe-area-context/src/NativeSafeAreaProvider.web.tsx b/node_modules/react-native-safe-area-context/src/NativeSafeAreaProvider.web.tsx
+deleted file mode 100644
+index 5bcdf5c..0000000
+--- a/node_modules/react-native-safe-area-context/src/NativeSafeAreaProvider.web.tsx
++++ /dev/null
+@@ -1,192 +0,0 @@
+-/* eslint-env browser */
+-
+-import * as React from 'react';
+-import { View } from 'react-native';
+-import type { NativeSafeAreaProviderProps } from './SafeArea.types';
+-
+-const CSSTransitions: Record<string, string> = {
+-  WebkitTransition: 'webkitTransitionEnd',
+-  Transition: 'transitionEnd',
+-  MozTransition: 'transitionend',
+-  MSTransition: 'msTransitionEnd',
+-  OTransition: 'oTransitionEnd',
+-};
+-
+-export function NativeSafeAreaProvider({
+-  children,
+-  style,
+-  onInsetsChange,
+-  ref,
+-}: NativeSafeAreaProviderProps) {
+-  const viewRef = React.useRef<View>(null);
+-
+-  const setRef = React.useCallback(
+-    (view: View | null) => {
+-      viewRef.current = view;
+-
+-      if (typeof ref === 'function') {
+-        return ref(view);
+-      } else if (ref != null) {
+-        ref.current = view;
+-      }
+-    },
+-    [ref],
+-  );
+-
+-  React.useEffect(() => {
+-    // Skip for SSR.
+-    if (typeof document === 'undefined') {
+-      return;
+-    }
+-
+-    // On react-native-web the view ref is the underlying DOM element.
+-    const providerElement = viewRef.current as unknown as HTMLElement | null;
+-    // When the provider element cannot be measured or observed, insets and
+-    // frame stay based on the window instead of the provider view.
+-    const canMeasureProviderElement =
+-      typeof ResizeObserver !== 'undefined' &&
+-      providerElement != null &&
+-      typeof providerElement.getBoundingClientRect === 'function';
+-
+-    const element = createContextElement();
+-    document.body.appendChild(element);
+-    const onEnd = () => {
+-      const { paddingTop, paddingBottom, paddingLeft, paddingRight } =
+-        window.getComputedStyle(element);
+-
+-      const windowInsets = {
+-        top: paddingTop ? parseInt(paddingTop, 10) : 0,
+-        bottom: paddingBottom ? parseInt(paddingBottom, 10) : 0,
+-        left: paddingLeft ? parseInt(paddingLeft, 10) : 0,
+-        right: paddingRight ? parseInt(paddingRight, 10) : 0,
+-      };
+-
+-      let insets = windowInsets;
+-      let frame = {
+-        x: 0,
+-        y: 0,
+-        width: document.documentElement.offsetWidth,
+-        height: document.documentElement.offsetHeight,
+-      };
+-
+-      if (canMeasureProviderElement) {
+-        // Match the native implementations: report the provider view's frame
+-        // in viewport coordinates and clamp the window insets to the part
+-        // overlapping the provider view.
+-        const rect = providerElement.getBoundingClientRect();
+-        insets = {
+-          top: Math.max(0, windowInsets.top - rect.top),
+-          bottom: Math.max(
+-            0,
+-            windowInsets.bottom - (window.innerHeight - rect.bottom),
+-          ),
+-          left: Math.max(0, windowInsets.left - rect.left),
+-          right: Math.max(
+-            0,
+-            windowInsets.right - (window.innerWidth - rect.right),
+-          ),
+-        };
+-        frame = {
+-          x: rect.left,
+-          y: rect.top,
+-          width: rect.width,
+-          height: rect.height,
+-        };
+-      }
+-
+-      // @ts-ignore: missing properties
+-      onInsetsChange({ nativeEvent: { insets, frame } });
+-    };
+-    element.addEventListener(getSupportedTransitionEvent(), onEnd);
+-    window.addEventListener('resize', onEnd);
+-    onEnd();
+-
+-    let resizeObserver: ResizeObserver | null = null;
+-    if (canMeasureProviderElement) {
+-      // Note this only observes size changes. Position-only changes (an
+-      // ancestor scrolling or a layout shift that moves the element without
+-      // resizing it) are not re-reported until the next resize or env()
+-      // change. This matches the native implementations, which are driven
+-      // by layout and inset change events, and keeps scrolling free of
+-      // per-frame measurement work.
+-      resizeObserver = new ResizeObserver(onEnd);
+-      resizeObserver.observe(providerElement);
+-    }
+-
+-    return () => {
+-      element.removeEventListener(getSupportedTransitionEvent(), onEnd);
+-      window.removeEventListener('resize', onEnd);
+-      resizeObserver?.disconnect();
+-      element.remove();
+-    };
+-  }, [onInsetsChange]);
+-
+-  return (
+-    <View ref={setRef} style={style}>
+-      {children}
+-    </View>
+-  );
+-}
+-
+-let _supportedTransitionEvent: string | null | undefined = null;
+-function getSupportedTransitionEvent(): string {
+-  if (_supportedTransitionEvent != null) {
+-    return _supportedTransitionEvent;
+-  }
+-  const element = document.createElement('invalidtype');
+-
+-  _supportedTransitionEvent = CSSTransitions.Transition;
+-  for (const key in CSSTransitions) {
+-    if (element.style[key as keyof CSSStyleDeclaration] !== undefined) {
+-      _supportedTransitionEvent = CSSTransitions[key];
+-      break;
+-    }
+-  }
+-  return _supportedTransitionEvent as string;
+-}
+-
+-type CssEnv = 'constant' | 'env';
+-
+-let _supportedEnv: CssEnv | null = null;
+-function getSupportedEnv(): CssEnv {
+-  if (_supportedEnv !== null) {
+-    return _supportedEnv;
+-  }
+-  const { CSS } = window;
+-  if (
+-    CSS &&
+-    CSS.supports &&
+-    CSS.supports('top: constant(safe-area-inset-top)')
+-  ) {
+-    _supportedEnv = 'constant';
+-  } else {
+-    _supportedEnv = 'env';
+-  }
+-  return _supportedEnv;
+-}
+-
+-function getInset(side: string): string {
+-  return `${getSupportedEnv()}(safe-area-inset-${side})`;
+-}
+-
+-function createContextElement(): HTMLElement {
+-  const element = document.createElement('div');
+-  const { style } = element;
+-  style.position = 'fixed';
+-  style.left = '0';
+-  style.top = '0';
+-  style.width = '0';
+-  style.height = '0';
+-  style.zIndex = '-1';
+-  style.overflow = 'hidden';
+-  style.visibility = 'hidden';
+-  // Bacon: Anything faster than this and the callback will be invoked too early with the wrong insets
+-  style.transitionDuration = '0.05s';
+-  style.transitionProperty = 'padding';
+-  style.transitionDelay = '0s';
+-  style.paddingTop = getInset('top');
+-  style.paddingBottom = getInset('bottom');
+-  style.paddingLeft = getInset('left');
+-  style.paddingRight = getInset('right');
+-  return element;
+-}
+diff --git a/node_modules/react-native-safe-area-context/src/NativeSafeAreaProvider.windows.tsx b/node_modules/react-native-safe-area-context/src/NativeSafeAreaProvider.windows.tsx
+deleted file mode 100644
+index 969c3ea..0000000
+--- a/node_modules/react-native-safe-area-context/src/NativeSafeAreaProvider.windows.tsx
++++ /dev/null
+@@ -1 +0,0 @@
+-export { CompatNativeSafeAreaProvider as NativeSafeAreaProvider } from './CompatNativeSafeAreaProvider';
+diff --git a/node_modules/react-native-safe-area-context/src/SafeArea.types.ts b/node_modules/react-native-safe-area-context/src/SafeArea.types.ts
+deleted file mode 100644
+index 5672e5d..0000000
+--- a/node_modules/react-native-safe-area-context/src/SafeArea.types.ts
++++ /dev/null
+@@ -1,48 +0,0 @@
+-import type * as React from 'react';
+-import type { NativeSyntheticEvent, View, ViewProps } from 'react-native';
+-import NativeSafeAreaView from './specs/NativeSafeAreaView';
+-
+-export type Edge = 'top' | 'right' | 'bottom' | 'left';
+-export type EdgeMode = 'off' | 'additive' | 'maximum';
+-
+-export type EdgeRecord = Partial<Record<Edge, EdgeMode>>;
+-export type Edges = readonly Edge[] | Readonly<EdgeRecord>;
+-
+-export interface EdgeInsets {
+-  top: number;
+-  right: number;
+-  bottom: number;
+-  left: number;
+-}
+-
+-export interface Rect {
+-  x: number;
+-  y: number;
+-  width: number;
+-  height: number;
+-}
+-
+-export interface Metrics {
+-  insets: EdgeInsets;
+-  frame: Rect;
+-}
+-
+-export type InsetChangedEvent = NativeSyntheticEvent<Metrics>;
+-
+-export type InsetChangeNativeCallback = (event: InsetChangedEvent) => void;
+-
+-export interface NativeSafeAreaProviderProps extends ViewProps {
+-  ref?: React.Ref<View>;
+-  children?: React.ReactNode;
+-  onInsetsChange: InsetChangeNativeCallback;
+-}
+-
+-export interface NativeSafeAreaViewProps extends ViewProps {
+-  children?: React.ReactNode;
+-  mode?: 'padding' | 'margin';
+-  edges?: Edges;
+-}
+-
+-export type NativeSafeAreaViewInstance = InstanceType<
+-  typeof NativeSafeAreaView
+->;
+diff --git a/node_modules/react-native-safe-area-context/src/SafeAreaContext.tsx b/node_modules/react-native-safe-area-context/src/SafeAreaContext.tsx
+deleted file mode 100644
+index 72f2c0b..0000000
+--- a/node_modules/react-native-safe-area-context/src/SafeAreaContext.tsx
++++ /dev/null
+@@ -1,205 +0,0 @@
+-import * as React from 'react';
+-import {
+-  Dimensions,
+-  StyleSheet,
+-  type View,
+-  type ViewProps,
+-} from 'react-native';
+-import { NativeSafeAreaProvider } from './NativeSafeAreaProvider';
+-import type {
+-  EdgeInsets,
+-  InsetChangedEvent,
+-  Metrics,
+-  Rect,
+-} from './SafeArea.types';
+-
+-const isDev = process.env.NODE_ENV !== 'production';
+-
+-export const SafeAreaInsetsContext = React.createContext<EdgeInsets | null>(
+-  null,
+-);
+-if (isDev) {
+-  SafeAreaInsetsContext.displayName = 'SafeAreaInsetsContext';
+-}
+-
+-export const SafeAreaFrameContext = React.createContext<Rect | null>(null);
+-if (isDev) {
+-  SafeAreaFrameContext.displayName = 'SafeAreaFrameContext';
+-}
+-
+-export interface SafeAreaProviderProps extends ViewProps {
+-  ref?: React.Ref<View>;
+-  children?: React.ReactNode;
+-  initialMetrics?: Metrics | null;
+-  /**
+-   * @deprecated
+-   */
+-  initialSafeAreaInsets?: EdgeInsets | null;
+-}
+-
+-export function SafeAreaProvider({
+-  children,
+-  initialMetrics,
+-  initialSafeAreaInsets,
+-  style,
+-  ref,
+-  ...others
+-}: SafeAreaProviderProps) {
+-  const parentInsets = useParentSafeAreaInsets();
+-  const parentFrame = useParentSafeAreaFrame();
+-  const [insets, setInsets] = React.useState<EdgeInsets | null>(
+-    initialMetrics?.insets ?? initialSafeAreaInsets ?? parentInsets ?? null,
+-  );
+-  const [frame, setFrame] = React.useState<Rect>(
+-    initialMetrics?.frame ??
+-      parentFrame ?? {
+-        // Backwards compat so we render anyway if we don't have frame.
+-        x: 0,
+-        y: 0,
+-        width: Dimensions.get('window').width,
+-        height: Dimensions.get('window').height,
+-      },
+-  );
+-  const onInsetsChange = React.useCallback((event: InsetChangedEvent) => {
+-    const {
+-      nativeEvent: { frame: nextFrame, insets: nextInsets },
+-    } = event;
+-
+-    setFrame((curFrame) => {
+-      if (
+-        // Backwards compat with old native code that won't send frame.
+-        nextFrame &&
+-        (nextFrame.height !== curFrame.height ||
+-          nextFrame.width !== curFrame.width ||
+-          nextFrame.x !== curFrame.x ||
+-          nextFrame.y !== curFrame.y)
+-      ) {
+-        return nextFrame;
+-      } else {
+-        return curFrame;
+-      }
+-    });
+-
+-    setInsets((curInsets) => {
+-      if (
+-        !curInsets ||
+-        nextInsets.bottom !== curInsets.bottom ||
+-        nextInsets.left !== curInsets.left ||
+-        nextInsets.right !== curInsets.right ||
+-        nextInsets.top !== curInsets.top
+-      ) {
+-        return nextInsets;
+-      } else {
+-        return curInsets;
+-      }
+-    });
+-  }, []);
+-
+-  return (
+-    <NativeSafeAreaProvider
+-      ref={ref}
+-      style={[styles.fill, style]}
+-      onInsetsChange={onInsetsChange}
+-      {...others}
+-    >
+-      {insets != null ? (
+-        <SafeAreaFrameContext.Provider value={frame}>
+-          <SafeAreaInsetsContext.Provider value={insets}>
+-            {children}
+-          </SafeAreaInsetsContext.Provider>
+-        </SafeAreaFrameContext.Provider>
+-      ) : null}
+-    </NativeSafeAreaProvider>
+-  );
+-}
+-
+-export interface SafeAreaListenerProps extends ViewProps {
+-  onChange: (data: { insets: EdgeInsets; frame: Rect }) => void;
+-}
+-
+-export function SafeAreaListener({
+-  onChange,
+-  style,
+-  children,
+-  ...others
+-}: SafeAreaListenerProps) {
+-  return (
+-    <NativeSafeAreaProvider
+-      {...others}
+-      style={[styles.fill, style]}
+-      onInsetsChange={(e) => {
+-        onChange({
+-          insets: e.nativeEvent.insets,
+-          frame: e.nativeEvent.frame,
+-        });
+-      }}
+-    >
+-      {children}
+-    </NativeSafeAreaProvider>
+-  );
+-}
+-
+-const styles = StyleSheet.create({
+-  fill: { flex: 1 },
+-});
+-
+-function useParentSafeAreaInsets(): EdgeInsets | null {
+-  return React.useContext(SafeAreaInsetsContext);
+-}
+-
+-function useParentSafeAreaFrame(): Rect | null {
+-  return React.useContext(SafeAreaFrameContext);
+-}
+-
+-const NO_INSETS_ERROR =
+-  'No safe area value available. Make sure you are rendering `<SafeAreaProvider>` at the top of your app.';
+-
+-export function useSafeAreaInsets(): EdgeInsets {
+-  const insets = React.useContext(SafeAreaInsetsContext);
+-  if (insets == null) {
+-    throw new Error(NO_INSETS_ERROR);
+-  }
+-  return insets;
+-}
+-
+-export function useSafeAreaFrame(): Rect {
+-  const frame = React.useContext(SafeAreaFrameContext);
+-  if (frame == null) {
+-    throw new Error(NO_INSETS_ERROR);
+-  }
+-  return frame;
+-}
+-
+-export type WithSafeAreaInsetsProps = {
+-  insets: EdgeInsets;
+-};
+-
+-export function withSafeAreaInsets<T>(
+-  WrappedComponent: React.ComponentType<
+-    (React.PropsWithoutRef<T> | T) & WithSafeAreaInsetsProps
+-  >,
+-): React.ForwardRefExoticComponent<
+-  React.PropsWithoutRef<T> & React.RefAttributes<unknown>
+-> {
+-  return React.forwardRef<unknown, T>((props, ref) => {
+-    const insets = useSafeAreaInsets();
+-    return <WrappedComponent {...props} insets={insets} ref={ref} />;
+-  });
+-}
+-
+-/**
+- * @deprecated
+- */
+-export function useSafeArea(): EdgeInsets {
+-  return useSafeAreaInsets();
+-}
+-
+-/**
+- * @deprecated
+- */
+-export const SafeAreaConsumer = SafeAreaInsetsContext.Consumer;
+-
+-/**
+- * @deprecated
+- */
+-export const SafeAreaContext = SafeAreaInsetsContext;
+diff --git a/node_modules/react-native-safe-area-context/src/SafeAreaView.tsx b/node_modules/react-native-safe-area-context/src/SafeAreaView.tsx
+deleted file mode 100644
+index 1fe6b80..0000000
+--- a/node_modules/react-native-safe-area-context/src/SafeAreaView.tsx
++++ /dev/null
+@@ -1,50 +0,0 @@
+-import * as React from 'react';
+-import type {
+-  Edge,
+-  EdgeMode,
+-  EdgeRecord,
+-  NativeSafeAreaViewInstance,
+-  NativeSafeAreaViewProps,
+-} from './SafeArea.types';
+-import NativeSafeAreaView from './specs/NativeSafeAreaView';
+-import { useMemo } from 'react';
+-
+-const defaultEdges: Record<Edge, EdgeMode> = {
+-  top: 'additive',
+-  left: 'additive',
+-  bottom: 'additive',
+-  right: 'additive',
+-};
+-
+-export type SafeAreaViewProps = NativeSafeAreaViewProps;
+-
+-export const SafeAreaView = React.forwardRef<
+-  NativeSafeAreaViewInstance,
+-  SafeAreaViewProps
+->(({ edges, ...props }, ref) => {
+-  const nativeEdges = useMemo(() => {
+-    if (edges == null) {
+-      return defaultEdges;
+-    }
+-
+-    const edgesObj = Array.isArray(edges)
+-      ? edges.reduce<EdgeRecord>((acc, edge: Edge) => {
+-          acc[edge] = 'additive';
+-          return acc;
+-        }, {})
+-      : // ts has trouble with refining readonly arrays.
+-        (edges as EdgeRecord);
+-
+-    // make sure that we always pass all edges, required for fabric
+-    const requiredEdges: Record<Edge, EdgeMode> = {
+-      top: edgesObj.top ?? 'off',
+-      right: edgesObj.right ?? 'off',
+-      bottom: edgesObj.bottom ?? 'off',
+-      left: edgesObj.left ?? 'off',
+-    };
+-
+-    return requiredEdges;
+-  }, [edges]);
+-
+-  return <NativeSafeAreaView {...props} edges={nativeEdges} ref={ref} />;
+-});
+diff --git a/node_modules/react-native-safe-area-context/src/SafeAreaView.web.tsx b/node_modules/react-native-safe-area-context/src/SafeAreaView.web.tsx
+deleted file mode 100644
+index 431f0aa..0000000
+--- a/node_modules/react-native-safe-area-context/src/SafeAreaView.web.tsx
++++ /dev/null
+@@ -1,123 +0,0 @@
+-import * as React from 'react';
+-import { StyleSheet, View } from 'react-native';
+-import {
+-  Edge,
+-  EdgeMode,
+-  EdgeRecord,
+-  NativeSafeAreaViewInstance,
+-  NativeSafeAreaViewProps,
+-} from './SafeArea.types';
+-import { useSafeAreaInsets } from './SafeAreaContext';
+-
+-const defaultEdges: Record<Edge, EdgeMode> = {
+-  top: 'additive',
+-  left: 'additive',
+-  bottom: 'additive',
+-  right: 'additive',
+-};
+-
+-function getEdgeValue(
+-  inset: number,
+-  current: number,
+-  mode: EdgeMode | undefined,
+-) {
+-  switch (mode) {
+-    case 'maximum':
+-      return Math.max(current, inset);
+-    case 'additive':
+-      return current + inset;
+-    case 'off':
+-    default:
+-      return current;
+-  }
+-}
+-
+-export const SafeAreaView = React.forwardRef<
+-  NativeSafeAreaViewInstance,
+-  NativeSafeAreaViewProps
+->(({ style = {}, mode, edges, ...rest }, ref) => {
+-  const insets = useSafeAreaInsets();
+-
+-  const edgesRecord = React.useMemo(() => {
+-    if (edges == null) {
+-      return defaultEdges;
+-    }
+-
+-    return Array.isArray(edges)
+-      ? edges.reduce<EdgeRecord>((acc, edge: Edge) => {
+-          acc[edge] = 'additive';
+-          return acc;
+-        }, {})
+-      : // ts has trouble with refining readonly arrays.
+-        (edges as EdgeRecord);
+-  }, [edges]);
+-
+-  const appliedStyle = React.useMemo(() => {
+-    const flatStyle = StyleSheet.flatten(style) as Record<string, number>;
+-
+-    if (mode === 'margin') {
+-      const {
+-        margin = 0,
+-        marginVertical = margin,
+-        marginHorizontal = margin,
+-        marginTop = marginVertical,
+-        marginRight = marginHorizontal,
+-        marginBottom = marginVertical,
+-        marginLeft = marginHorizontal,
+-      } = flatStyle;
+-
+-      const marginStyle = {
+-        marginTop: getEdgeValue(insets.top, marginTop, edgesRecord.top),
+-        marginRight: getEdgeValue(insets.right, marginRight, edgesRecord.right),
+-        marginBottom: getEdgeValue(
+-          insets.bottom,
+-          marginBottom,
+-          edgesRecord.bottom,
+-        ),
+-        marginLeft: getEdgeValue(insets.left, marginLeft, edgesRecord.left),
+-      };
+-
+-      return [style, marginStyle];
+-    } else {
+-      const {
+-        padding = 0,
+-        paddingVertical = padding,
+-        paddingHorizontal = padding,
+-        paddingTop = paddingVertical,
+-        paddingRight = paddingHorizontal,
+-        paddingBottom = paddingVertical,
+-        paddingLeft = paddingHorizontal,
+-      } = flatStyle;
+-
+-      const paddingStyle = {
+-        paddingTop: getEdgeValue(insets.top, paddingTop, edgesRecord.top),
+-        paddingRight: getEdgeValue(
+-          insets.right,
+-          paddingRight,
+-          edgesRecord.right,
+-        ),
+-        paddingBottom: getEdgeValue(
+-          insets.bottom,
+-          paddingBottom,
+-          edgesRecord.bottom,
+-        ),
+-        paddingLeft: getEdgeValue(insets.left, paddingLeft, edgesRecord.left),
+-      };
+-
+-      return [style, paddingStyle];
+-    }
+-  }, [
+-    edgesRecord.bottom,
+-    edgesRecord.left,
+-    edgesRecord.right,
+-    edgesRecord.top,
+-    insets.bottom,
+-    insets.left,
+-    insets.right,
+-    insets.top,
+-    mode,
+-    style,
+-  ]);
+-
+-  return <View style={appliedStyle} {...rest} ref={ref} />;
+-});
+diff --git a/node_modules/react-native-safe-area-context/src/SafeAreaView.windows.tsx b/node_modules/react-native-safe-area-context/src/SafeAreaView.windows.tsx
+deleted file mode 100644
+index 45afbe0..0000000
+--- a/node_modules/react-native-safe-area-context/src/SafeAreaView.windows.tsx
++++ /dev/null
+@@ -1,4 +0,0 @@
+-import { View } from 'react-native';
+-import type { NativeSafeAreaViewInstance } from './SafeArea.types';
+-
+-export const SafeAreaView = View as unknown as NativeSafeAreaViewInstance;
+diff --git a/node_modules/react-native-safe-area-context/src/index.tsx b/node_modules/react-native-safe-area-context/src/index.tsx
+deleted file mode 100644
+index 61f90b5..0000000
+--- a/node_modules/react-native-safe-area-context/src/index.tsx
++++ /dev/null
+@@ -1,6 +0,0 @@
+-'use client';
+-
+-export * from './SafeAreaContext';
+-export * from './SafeAreaView';
+-export * from './InitialWindow';
+-export * from './SafeArea.types';
+diff --git a/node_modules/react-native-safe-area-context/src/jest/mock.tsx b/node_modules/react-native-safe-area-context/src/jest/mock.tsx
+deleted file mode 100644
+index 3bb05fa..0000000
+--- a/node_modules/react-native-safe-area-context/src/jest/mock.tsx
++++ /dev/null
+@@ -1,59 +0,0 @@
+-import { jest } from '@jest/globals';
+-import React, { useContext } from 'react';
+-import type { Metrics } from '../SafeArea.types';
+-import type {
+-  SafeAreaProviderProps,
+-  SafeAreaInsetsContext,
+-  SafeAreaFrameContext,
+-} from '../SafeAreaContext';
+-
+-const MOCK_INITIAL_METRICS: Metrics = {
+-  frame: {
+-    width: 320,
+-    height: 640,
+-    x: 0,
+-    y: 0,
+-  },
+-  insets: {
+-    left: 0,
+-    right: 0,
+-    bottom: 0,
+-    top: 0,
+-  },
+-};
+-
+-const RNSafeAreaContext = jest.requireActual<{
+-  SafeAreaInsetsContext: typeof SafeAreaInsetsContext;
+-  SafeAreaFrameContext: typeof SafeAreaFrameContext;
+-}>('react-native-safe-area-context');
+-
+-export default {
+-  ...RNSafeAreaContext,
+-  initialWindowMetrics: MOCK_INITIAL_METRICS,
+-  useSafeAreaInsets: jest.fn(() => {
+-    return (
+-      useContext(RNSafeAreaContext.SafeAreaInsetsContext) ??
+-      MOCK_INITIAL_METRICS.insets
+-    );
+-  }),
+-  useSafeAreaFrame: jest.fn(() => {
+-    return (
+-      useContext(RNSafeAreaContext.SafeAreaFrameContext) ??
+-      MOCK_INITIAL_METRICS.frame
+-    );
+-  }),
+-  // Provide a simpler implementation with default values.
+-  SafeAreaProvider: ({ children, initialMetrics }: SafeAreaProviderProps) => {
+-    return (
+-      <RNSafeAreaContext.SafeAreaFrameContext.Provider
+-        value={initialMetrics?.frame ?? MOCK_INITIAL_METRICS.frame}
+-      >
+-        <RNSafeAreaContext.SafeAreaInsetsContext.Provider
+-          value={initialMetrics?.insets ?? MOCK_INITIAL_METRICS.insets}
+-        >
+-          {children}
+-        </RNSafeAreaContext.SafeAreaInsetsContext.Provider>
+-      </RNSafeAreaContext.SafeAreaFrameContext.Provider>
+-    );
+-  },
+-};
+diff --git a/node_modules/react-native-safe-area-context/src/specs/NativeSafeAreaContext.ts b/node_modules/react-native-safe-area-context/src/specs/NativeSafeAreaContext.ts
+deleted file mode 100644
+index b384b65..0000000
+--- a/node_modules/react-native-safe-area-context/src/specs/NativeSafeAreaContext.ts
++++ /dev/null
+@@ -1,23 +0,0 @@
+-import { TurboModule, TurboModuleRegistry } from 'react-native';
+-import type { Double } from 'react-native/Libraries/Types/CodegenTypes';
+-
+-export interface Spec extends TurboModule {
+-  getConstants: () => {
+-    initialWindowMetrics?: {
+-      insets: {
+-        top: Double;
+-        right: Double;
+-        bottom: Double;
+-        left: Double;
+-      };
+-      frame: {
+-        x: Double;
+-        y: Double;
+-        width: Double;
+-        height: Double;
+-      };
+-    };
+-  };
+-}
+-
+-export default TurboModuleRegistry.get<Spec>('RNCSafeAreaContext');
+diff --git a/node_modules/react-native-safe-area-context/src/specs/NativeSafeAreaProvider.ts b/node_modules/react-native-safe-area-context/src/specs/NativeSafeAreaProvider.ts
+deleted file mode 100644
+index 5e6974e..0000000
+--- a/node_modules/react-native-safe-area-context/src/specs/NativeSafeAreaProvider.ts
++++ /dev/null
+@@ -1,29 +0,0 @@
+-import type {
+-  DirectEventHandler,
+-  Double,
+-} from 'react-native/Libraries/Types/CodegenTypes';
+-import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
+-import type { ViewProps, HostComponent } from 'react-native';
+-
+-export type Event = Readonly<{
+-  insets: Readonly<{
+-    top: Double;
+-    right: Double;
+-    bottom: Double;
+-    left: Double;
+-  }>;
+-  frame: Readonly<{
+-    x: Double;
+-    y: Double;
+-    width: Double;
+-    height: Double;
+-  }>;
+-}>;
+-
+-export interface NativeProps extends ViewProps {
+-  onInsetsChange?: DirectEventHandler<Event>;
+-}
+-
+-export default codegenNativeComponent<NativeProps>(
+-  'RNCSafeAreaProvider',
+-) as HostComponent<NativeProps>;
+diff --git a/node_modules/react-native-safe-area-context/src/specs/NativeSafeAreaView.ts b/node_modules/react-native-safe-area-context/src/specs/NativeSafeAreaView.ts
+deleted file mode 100644
+index 0ab6adf..0000000
+--- a/node_modules/react-native-safe-area-context/src/specs/NativeSafeAreaView.ts
++++ /dev/null
+@@ -1,17 +0,0 @@
+-import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
+-import type { WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
+-import type { ViewProps, HostComponent } from 'react-native';
+-
+-export interface NativeProps extends ViewProps {
+-  mode?: WithDefault<'padding' | 'margin', 'padding'>;
+-  edges?: Readonly<{
+-    top: string;
+-    right: string;
+-    bottom: string;
+-    left: string;
+-  }>;
+-}
+-
+-export default codegenNativeComponent<NativeProps>('RNCSafeAreaView', {
+-  interfaceOnly: true,
+-}) as HostComponent<NativeProps>;

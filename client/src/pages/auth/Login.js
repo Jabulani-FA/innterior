@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { auth } from './Firebase';
 import { toast } from 'react-toastify';
 import {MailOutlined, GoogleOutlined, LoadingOutlined } from '@ant-design/icons';
-import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { getIdToken, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from 'antd';
 import { useSelector } from 'react-redux';
 import { createOrUpdateUser} from '../../functions/auth';
@@ -18,10 +18,11 @@ const Login = () => {
 
   let dispatch = useDispatch()
   let navigate = useNavigate()
+  let location = useLocation()
   const { user }  = useSelector((state) => ({...state}))
   
   useEffect(() => {
-    let intended = navigate.state
+    let intended = location.state
     if (intended) {
       return
     }
@@ -31,10 +32,10 @@ const Login = () => {
     }
     }
     
-  }, [user, navigate])
+  }, [user, navigate, location.state])
 
   const roleBasedRedirect = (res) => {
-    let intended = navigate.state
+    let intended = location.state
     if (intended) {
       navigate(intended.from)
     }
@@ -55,74 +56,48 @@ const Login = () => {
     e.preventDefault();
     setLoading(true)
     //console.table(email, password)
-    signInWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      // Signed in 
-      const user = userCredential.user;
-      const idTokenResult = user.accessToken
-      // console.log(userCredential);
-
-      createOrUpdateUser(idTokenResult)
-      .then((res) => {
-        dispatch({
-          type: 'LOGGED_IN_USER',
-          payload: {
-            name: res.data.name,
-            email: res.data.email,
-            token: idTokenResult,
-            role: res.data.role,
-            _id: res.data._id,
-          }
-        });
-        roleBasedRedirect(res)
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      const idToken = await getIdToken(userCredential.user)
+      const res = await createOrUpdateUser(idToken)
+      dispatch({
+        type: 'LOGGED_IN_USER',
+        payload: {
+          name: res.data.name,
+          email: res.data.email,
+          token: idToken,
+          role: res.data.role,
+          _id: res.data._id,
+        }
       })
-      .catch((error) => {
-        console.log("Caught ", error)
-        toast.error(error)
-        setLoading(false)
-      })
-    })
-    .catch ((error) => {
-      const errorMessage = error.message
-      toast.error(errorMessage)
+      roleBasedRedirect(res)
+    } catch (error) {
+      toast.error(error.response?.data?.error || error.message || 'Unable to sign in.')
+    } finally {
       setLoading(false)
-    })
+    }
   }
 
   const googleLogin = async (e) => {
     e.preventDefault();
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-    .then((result) => {
-      // This gives you a Google Access Token. You can use it to access the Google API.
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const idTokenResult = credential.accessToken;
-      // The signed-in user info.
-      // const user = result.user;
-      
-      // IdP data available using getAdditionalUserInfo(result)
-      // ...
-      createOrUpdateUser(idTokenResult)
-      .then((res) => {
-        dispatch({
-          type: 'LOGGED_IN_USER',
-          payload: {
-            name: res.data.name,
-            email: res.data.email,
-            token: idTokenResult,
-            role: res.data.role,
-            _id: res.data._id,
-          }
-        });
-        roleBasedRedirect(res)
+    try {
+      const result = await signInWithPopup(auth, new GoogleAuthProvider())
+      const idToken = await getIdToken(result.user)
+      const res = await createOrUpdateUser(idToken)
+      dispatch({
+        type: 'LOGGED_IN_USER',
+        payload: {
+          name: res.data.name,
+          email: res.data.email,
+          token: idToken,
+          role: res.data.role,
+          _id: res.data._id,
+        }
       })
-      // navigate('/')
-    })
-    .catch((error) => {
-      const errorMessage = error.message
-      toast.error(errorMessage)
-    })
-    // console.log('here and there');
+      roleBasedRedirect(res)
+    } catch (error) {
+      toast.error(error.response?.data?.error || error.message || 'Unable to sign in with Google.')
+    }
   }
 
   // The user fills the login form
